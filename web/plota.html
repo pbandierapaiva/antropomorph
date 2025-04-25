@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráfico de IMC por Idade em Dias</title>
+    <title>Gráfico de IMC para Idade de 0 a 2 Anos</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         form { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <h1>Gráfico de IMC por Idade em Dias</h1>
+    <h1>Gráfico de IMC para Idade de 0 a 2 Anos</h1>
     <form id="formulario">
         <label for="data_nascimento">Data de Nascimento:</label>
         <input type="date" id="data_nascimento" required>
@@ -36,7 +36,7 @@
             
             try {
                 const response = await fetch(
-                    `http://localhost:8000/plotar-ponto/?data_nascimento=${data_nascimento}&imc=${imc}`
+                    `/plotar-ponto/?data_nascimento=${data_nascimento}&imc=${imc}`
                 );
                 if (!response.ok) throw new Error(await response.text());
                 
