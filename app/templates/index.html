@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Plataforma de Avaliação Antropométrica</h1>
+        <p>UNIFESP - Departamento de Informática em Saúde</p>
+    </header>
+
+    <main>
+        <section id="individual-input">
+            <h2>Entrada Individual</h2>
+            <form id="individualForm">
+                <div>
+                    <label for="nome">Nome (Opcional):</label>
+                    <input type="text" id="nome" name="nome">
+                </div>
+                <div>
+                    <label for="data_nascimento">Data de Nascimento:</label>
+                    <input type="date" id="data_nascimento" name="data_nascimento" required>
+                </div>
+                <div>
+                    <label for="data_avaliacao">Data da Avaliação:</label>
+                    <input type="date" id="data_avaliacao" name="data_avaliacao" required>
+                </div>
+                <div>
+                    <label for="sexo">Sexo:</label>
+                    <select id="sexo" name="sexo" required>
+                        <option value="">Selecione...</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Feminino</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="peso_kg">Peso (kg):</label>
+                    <input type="number" step="0.01" id="peso_kg" name="peso_kg" required placeholder="ex: 12.5">
+                </div>
+                <div>
+                    <label for="altura_cm">Altura/Comprimento (cm):</label>
+                    <input type="number" step="0.1" id="altura_cm" name="altura_cm" required placeholder="ex: 85.3">
+                </div>
+                <button type="submit">Processar Indivíduo</button>
+            </form>
+        </section>
+
+        <section id="batch-input">
+            <h2>Entrada em Lote (CSV/TSV)</h2>
+            <form id="batchForm">
+                <label for="batchFile">Selecione o arquivo:</label>
+                <input type="file" id="batchFile" name="batchFile" accept=".csv,.tsv" required>
+                <button type="submit">Processar Lote</button>
+                <p class="info">
+                    O arquivo CSV/TSV deve ter as colunas: <code>data_nascimento</code> (YYYY-MM-DD),
+                    <code>data_avaliacao</code> (YYYY-MM-DD), <code>sexo</code> (M/F),
+                    <code>peso_kg</code> (ex: 12.5), <code>altura_cm</code> (ex: 85.3).<br>
+                    Opcional: <code>nome</code> (texto). O cabeçalho é obrigatório.
+                </p>
+            </form>
+        </section>
+
+        <section id="results">
+            <h2>Resultados</h2>
+            <div id="loading" style="display: none;">Processando...</div>
+            <div id="error-message" class="error" style="display: none;"></div>
+            <div id="individual-result-display" style="display: none;">
+                <h3>Resultado Individual</h3>
+                <pre><code id="individual-json-result"></code></pre>
+                <div id="individual-report"></div>
+            </div>
+            <div id="batch-result-display" style="display: none;">
+                <h3>Resultados do Lote</h3>
+                <div id="batch-summary"></div>
+                <div id="batch-details">
+                    <!-- Detalhes de cada indivíduo do lote serão inseridos aqui -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© <span id="currentYear"></span> LABDIS - UNIFESP. Aluno: João Paulo Oliveira Braga.</p>
+    </footer>
+
+    <script src="{{ url_for('static', path='/js/script.js') }}"></script>
+</body>
+</html>

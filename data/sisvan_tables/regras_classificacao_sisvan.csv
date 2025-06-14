@@ -1,0 +1,10 @@
+indicador,idade_min_meses,idade_max_meses,sexo_aplicavel,z_score_min,z_score_max,classificacao_pt
+peso_idade,0,59,, -999,-3,Peso muito baixo para idade
+peso_idade,0,59,,-3,-2,Baixo peso para idade
+peso_idade,0,59,,-2,999,Peso adequado para idade
+imc_idade,0,59,,-999,-3,Magreza acentuada
+imc_idade,0,59,,-3,-2,Magreza
+imc_idade,0,59,,-2,1,Eutrofia
+imc_idade,0,59,,1,2,Risco de sobrepeso
+imc_idade,0,59,,2,3,Sobrepeso
+imc_idade,0,59,,3,999,Obesidade
