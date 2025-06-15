@@ -19,6 +19,7 @@ from app.models import (
     SexoEnum
 )
 
+# ... (As funções get_reference_value e get_classification_rule não mudam) ...
 def get_reference_value(db: Session, table_name: str, age_in_months: int, gender: str) -> Optional[TabelaReferenciaSISVAN]:
     indicador_map = {'pi_m': 'peso_idade', 'pi_f': 'peso_idade','ei_m': 'estatura_idade', 'ei_f': 'estatura_idade', 'imci_m': 'imc_idade', 'imci_f': 'imc_idade'}
     db_indicator_name = indicador_map.get(table_name)
@@ -39,42 +40,7 @@ class AnthropometryService:
     def __init__(self, db: Optional[Session]):
         self.db = db
 
-    def calculate_age_exact(self, birth_date: date, evaluation_date: date) -> Tuple[int, int, int, str, int, int]:
-        """
-        Calcula idade exata em anos, meses e dias, retornando também
-        o total em meses e total em dias
-        """
-        if evaluation_date < birth_date:
-            raise ValueError("Data de avaliação não pode ser anterior ao nascimento.")
-        
-        delta = relativedelta(evaluation_date, birth_date)
-        total_months = delta.years * 12 + delta.months
-        total_days = (evaluation_date - birth_date).days
-        
-        # Formato da string de idade
-        age_str_parts = []
-        if delta.years > 0:
-            age_str_parts.append(f"{delta.years} ano{'s' if delta.years > 1 else ''}")
-        if delta.months > 0:
-            age_str_parts.append(f"{delta.months} {'meses' if delta.months > 1 else 'mês'}")
-        if not age_str_parts and delta.days > 0:
-            age_str_parts.append(f"{delta.days} dias")
-        
-        age_str = " e ".join(age_str_parts) if age_str_parts else "0 dias"
-        
-        return (delta.years, delta.months, delta.days, age_str, total_months, total_days)
-
-    def calculate_imc(self, peso_kg: float, altura_cm: float) -> Optional[float]:
-        """
-        Calcula o IMC (Índice de Massa Corporal)
-        """
-        if altura_cm <= 0:
-            return None
-        
-        altura_m = altura_cm / 100
-        imc = peso_kg / (altura_m * altura_m)
-        return round(imc, 2)
-
+    # ATUALIZADO: para usar data de avaliação
     def _calculate_age(self, birth_date: date, evaluation_date: date) -> Tuple[int, str]:
         if evaluation_date < birth_date:
             raise ValueError("Data de avaliação não pode ser anterior ao nascimento.")
@@ -83,16 +49,11 @@ class AnthropometryService:
         age_in_months = delta.years * 12 + delta.months
         
         age_str_parts = []
-        if delta.years > 0: 
-            age_str_parts.append(f"{delta.years} ano{'s' if delta.years > 1 else ''}")
-        if delta.months > 0: 
-            age_str_parts.append(f"{delta.months} {'meses' if delta.months > 1 else 'mês'}")
+        if delta.years > 0: age_str_parts.append(f"{delta.years} ano{'s' if delta.years > 1 else ''}")
+        if delta.months > 0: age_str_parts.append(f"{delta.months} {'meses' if delta.months > 1 else 'mês'}")
         
-        if not age_str_parts: 
-            return 0, "0 meses"
-        return age_in_months, " e ".join(age_str_parts)
-
-    def _interpolate_z_score(self, value: Decimal, ref_row: TabelaReferenciaSISVAN) -> Optional[float]:
+        if not age_str_parts: return 0, "0 meses"
+        return age_in_months, " e ".join(age_str_parts)    def _interpolate_z_score(self, value: Decimal, ref_row: TabelaReferenciaSISVAN) -> Optional[float]:
         z_scores = [-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0]
         ref_values = [getattr(ref_row, f'valor_z_{"neg" if z < 0 else "pos"}_{abs(int(z))}' if z != 0 else 'valor_z_0') for z in z_scores]
         ref_values_decimal = [Decimal(str(v)) if v is not None else None for v in ref_values]
@@ -134,6 +95,7 @@ class AnthropometryService:
         
         return Indicador(tipo=display_name, valor_observado=value, escore_z=round(z_score, 2), classificacao=classification or "Não aplicável")
 
+    # ATUALIZADO: para passar a data de avaliação
     def process_individual_data(self, data: IndividuoCreate) -> ResultadoProcessamentoIndividual:
         age_in_months, age_str = self._calculate_age(data.data_nascimento, data.data_avaliacao)
         indicadores: List[Indicador] = []
@@ -157,7 +119,7 @@ class AnthropometryService:
             nome=data.nome,
             sexo=data.sexo.name.capitalize(),
             data_nascimento=data.data_nascimento,
-            data_avaliacao=data.data_avaliacao,
+            data_avaliacao=data.data_avaliacao, # <-- CAMPO ADICIONADO
             idade=age_str,
             peso_kg=data.peso_kg,
             altura_cm=data.altura_cm,
@@ -167,41 +129,35 @@ class AnthropometryService:
 
     def _parse_date_flexible(self, date_str: str) -> date:
         for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
-            try: 
-                return datetime.strptime(date_str, fmt).date()
-            except (ValueError, TypeError): 
-                continue
+            try: return datetime.strptime(date_str, fmt).date()
+            except (ValueError, TypeError): continue
         raise ValueError(f"Formato de data inválido: '{date_str}'. Use AAAA-MM-DD ou DD/MM/AAAA.")
 
     def _parse_float_flexible(self, value_str: str) -> Decimal:
-        try: 
-            return Decimal(value_str.replace(',', '.'))
-        except (InvalidOperation, TypeError): 
-            raise ValueError(f"Valor numérico inválido: '{value_str}'.")
+        try: return Decimal(value_str.replace(',', '.'))
+        except (InvalidOperation, TypeError): raise ValueError(f"Valor numérico inválido: '{value_str}'.")
 
+    # ATUALIZADO: para ler a coluna data_avaliacao do CSV
     def process_batch_data(self, file_contents: bytes, filename: str) -> Dict[str, Any]:
-        try: 
-            decoded_content = file_contents.decode('utf-8')
-        except UnicodeDecodeError: 
-            raise ValueError("Não foi possível decodificar o arquivo. Verifique se ele está no formato UTF-8.")
+        try: decoded_content = file_contents.decode('utf-8')
+        except UnicodeDecodeError: raise ValueError("Não foi possível decodificar o arquivo. Verifique se ele está no formato UTF-8.")
 
         sniffer = csv.Sniffer()
         try:
             dialect = sniffer.sniff(decoded_content.splitlines()[0] if decoded_content else "")
             delimiter = dialect.delimiter
-        except csv.Error:            delimiter = ',' if filename.endswith('.csv') else '\t'
+        except csv.Error:
+            delimiter = ',' if filename.endswith('.csv') else '\t'
         
         reader = csv.DictReader(io.StringIO(decoded_content), delimiter=delimiter)
         resultados_individuais, erros_por_linha = [], []
-        total_rows_attempted = 0
         
         for i, row in enumerate(reader):
             line_number = i + 2
-            total_rows_attempted += 1
             try:
                 # Normaliza chaves do dicionário para minúsculas e sem espaços
                 row_normalized = {k.strip().lower(): v for k, v in row.items()}
-                
+
                 nome = row_normalized.get('nome')
                 data_nascimento = row_normalized.get('data_nascimento')
                 data_avaliacao = row_normalized.get('data_avaliacao')
@@ -222,7 +178,7 @@ class AnthropometryService:
                 individuo_data = IndividuoCreate(
                     nome=str(nome),
                     data_nascimento=self._parse_date_flexible(str(data_nascimento)),
-                    data_avaliacao=self._parse_date_flexible(str(data_avaliacao)),
+                    data_avaliacao=self._parse_date_flexible(str(data_avaliacao)), # <-- CAMPO ADICIONADO
                     sexo=SexoEnum(row_normalized.get('sexo', '').strip().upper()),
                     peso_kg=self._parse_float_flexible(str(peso_kg)),
                     altura_cm=self._parse_float_flexible(str(altura_cm))
@@ -234,8 +190,40 @@ class AnthropometryService:
             except (ValueError, KeyError, AttributeError) as e:
                 erros_por_linha.append(ErroLinha(linha=line_number, erro=str(e), dados_originais=row))
         
-        return {
-            "resultados_individuais": resultados_individuais, 
-            "erros_por_linha": erros_por_linha,
-            "total_rows_attempted": total_rows_attempted
-        }
+        return {"resultados_individuais": resultados_individuais, "erros_por_linha": erros_por_linha}
+
+    def calculate_age_exact(self, birth_date: date, evaluation_date: date) -> Tuple[int, int, int, str, int, int]:
+        """
+        Calcula idade exata em anos, meses e dias, retornando também
+        o total em meses e total em dias
+        """
+        if evaluation_date < birth_date:
+            raise ValueError("Data de avaliação não pode ser anterior ao nascimento.")
+        
+        delta = relativedelta(evaluation_date, birth_date)
+        total_months = delta.years * 12 + delta.months
+        total_days = (evaluation_date - birth_date).days
+        
+        # Formato da string de idade
+        age_str_parts = []
+        if delta.years > 0:
+            age_str_parts.append(f"{delta.years} ano{'s' if delta.years > 1 else ''}")
+        if delta.months > 0:
+            age_str_parts.append(f"{delta.months} {'meses' if delta.months > 1 else 'mês'}")
+        if not age_str_parts and delta.days > 0:
+            age_str_parts.append(f"{delta.days} dias")
+        
+        age_str = " e ".join(age_str_parts) if age_str_parts else "0 dias"
+        
+        return (delta.years, delta.months, delta.days, age_str, total_months, total_days)
+
+    def calculate_imc(self, peso_kg: float, altura_cm: float) -> Optional[float]:
+        """
+        Calcula o IMC (Índice de Massa Corporal)
+        """
+        if altura_cm <= 0:
+            return None
+        
+        altura_m = altura_cm / 100
+        imc = peso_kg / (altura_m * altura_m)
+        return round(imc, 2)

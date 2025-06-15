@@ -1,91 +1,384 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <title>Avaliação Antropométrica</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
 </head>
+
 <body>
-    <header>
-        <h1>Plataforma de Avaliação Antropométrica</h1>
-        <p>UNIFESP - Departamento de Informática em Saúde</p>
-    </header>
-
-    <main>
-        <section id="individual-input">
-            <h2>Entrada Individual</h2>
-            <form id="individualForm">
-                <div>
-                    <label for="nome">Nome (Opcional):</label>
-                    <input type="text" id="nome" name="nome">
-                </div>
-                <div>
-                    <label for="data_nascimento">Data de Nascimento:</label>
-                    <input type="date" id="data_nascimento" name="data_nascimento" required>
-                </div>
-                <div>
-                    <label for="data_avaliacao">Data da Avaliação:</label>
-                    <input type="date" id="data_avaliacao" name="data_avaliacao" required>
-                </div>
-                <div>
-                    <label for="sexo">Sexo:</label>
-                    <select id="sexo" name="sexo" required>
-                        <option value="">Selecione...</option>
-                        <option value="M">Masculino</option>
-                        <option value="F">Feminino</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="peso_kg">Peso (kg):</label>
-                    <input type="number" step="0.01" id="peso_kg" name="peso_kg" required placeholder="ex: 12.5">
-                </div>
-                <div>
-                    <label for="altura_cm">Altura/Comprimento (cm):</label>
-                    <input type="number" step="0.1" id="altura_cm" name="altura_cm" required placeholder="ex: 85.3">
-                </div>
-                <button type="submit">Processar Indivíduo</button>
-            </form>
-        </section>
-
-        <section id="batch-input">
-            <h2>Entrada em Lote (CSV/TSV)</h2>
-            <form id="batchForm">
-                <label for="batchFile">Selecione o arquivo:</label>
-                <input type="file" id="batchFile" name="batchFile" accept=".csv,.tsv" required>
-                <button type="submit">Processar Lote</button>
-                <p class="info">
-                    O arquivo CSV/TSV deve ter as colunas: <code>data_nascimento</code> (YYYY-MM-DD),
-                    <code>data_avaliacao</code> (YYYY-MM-DD), <code>sexo</code> (M/F),
-                    <code>peso_kg</code> (ex: 12.5), <code>altura_cm</code> (ex: 85.3).<br>
-                    Opcional: <code>nome</code> (texto). O cabeçalho é obrigatório.
-                </p>
-            </form>
-        </section>
-
-        <section id="results">
-            <h2>Resultados</h2>
-            <div id="loading" style="display: none;">Processando...</div>
-            <div id="error-message" class="error" style="display: none;"></div>
-            <div id="individual-result-display" style="display: none;">
-                <h3>Resultado Individual</h3>
-                <pre><code id="individual-json-result"></code></pre>
-                <div id="individual-report"></div>
-            </div>
-            <div id="batch-result-display" style="display: none;">
-                <h3>Resultados do Lote</h3>
-                <div id="batch-summary"></div>
-                <div id="batch-details">
-                    <!-- Detalhes de cada indivíduo do lote serão inseridos aqui -->
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="logo-icon">
+                        <path
+                            d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                        <path d="M3.22 12H9.5l.7-1.5L11.5 14l1.5-3 1.5 3h5.27" />
+                    </svg>
+                    <h1 class="logo-text">Antro<span>pometric</span></h1>
                 </div>
             </div>
-        </section>
-    </main>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    Dashboard
+                </a>
+                <a href="#individual" class="nav-link" data-section="individual">
+                    <i data-lucide="user"></i>
+                    Avaliação Individual
+                </a>
+                <a href="#lote" class="nav-link" data-section="lote">
+                    <i data-lucide="users"></i>
+                    Avaliação em Lote
+                </a>
+                <a href="#relatorios" class="nav-link" data-section="relatorios">
+                    <i data-lucide="bar-chart-3"></i>
+                    Relatórios
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#configuracoes" class="nav-link" data-section="configuracoes">
+                    <i data-lucide="settings"></i>
+                    Configurações
+                </a>
+            </div>
+        </aside>
 
-    <footer>
-        <p>© <span id="currentYear"></span> LABDIS - UNIFESP. Aluno: João Paulo Oliveira Braga.</p>
-    </footer>
+        <div class="main-view">
+            <header class="header">
+                <div class="header-left">
+                    <button id="menu-toggle" class="header-icon">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h2 id="page-title" class="page-title">Dashboard</h2>
+                </div>
+                <div class="header-right">
+                    <button class="header-icon" aria-label="Notificações">
+                        <i data-lucide="bell"></i>
+                    </button>
+                    <div class="user-profile">
+                        <img src="https://placehold.co/40x40/E2E8F0/475569?text=JS" alt="Avatar do usuário"
+                            class="user-avatar">
+                        <div class="user-info">
+                            <p>Usuário</p>
+                            <p>LabDIS - UNIFESP</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-    <script src="{{ url_for('static', path='/js/script.js') }}"></script>
+            <main class="main-content">
+
+                <section id="dashboard-section" class="page-section active-section">
+                    <div class="dashboard-grid">
+                        <div class="card stat-card">
+                            <div class="stat-card-icon bg-sky-100 text-sky-600"><i data-lucide="scan-line"></i></div>
+                            <div class="stat-card-info">
+                                <p>Avaliações Realizadas</p>
+                                <p id="stat-avaliacoes">0</p>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card">
+                            <div class="stat-card-icon bg-emerald-100 text-emerald-600"><i data-lucide="smile"></i>
+                            </div>
+                            <div class="stat-card-info">
+                                <p>Eutróficos (IMC/I)</p>
+                                <p id="stat-eutroficos">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-card-icon bg-amber-100 text-amber-600"><i data-lucide="alert-triangle"></i>
+                            </div>
+                            <div class="stat-card-info">
+                                <p>Alertas Nutricionais</p>
+                                <p id="stat-alertas">0</p>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" , style="
+    margin-bottom: 24px;">
+                            <div class="stat-card-icon bg-rose-100 text-rose-600"><i data-lucide="frown"></i></div>
+                            <div class="stat-card-info">
+                                <p>Desnutrição/Sobrepeso</p>
+                                <p id="stat-desvios">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="page-title" style="font-size: 1.125rem; margin-bottom: 1rem;">Atividade Recente</h3>
+                        <div class="table-container">
+                            <table class="results-table" id="recent-activity-table">                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Idade</th>
+                                        <th>Data de Nascimento</th>
+                                        <th>Data da Avaliação</th>
+                                        <th>Peso (kg)</th>
+                                        <th>Peso/Idade</th>
+                                        <th>Altura (cm)</th>
+                                        <th>Altura/Idade</th>
+                                        <th>IMC</th>
+                                        <th>IMC/Idade</th>
+                                    </tr>
+                                </thead>                                <tbody>
+                                    <tr>
+                                        <td colspan="10" class="text-center">Nenhuma atividade recente.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="individual-section" class="page-section">
+                    <div class="page-card">
+                        <h3 class="card-title">Formulário de Avaliação Individual</h3>
+                        <form id="individualForm" class="form-grid">
+                            <div class="form-group col-span-2">
+                                <label for="nome" class="form-label">Nome Completo (Opcional)</label>
+                                <input type="text" id="nome" name="nome" class="form-input"
+                                    placeholder="Ex: João Paulo Oliveira Braga">
+                            </div>
+                            <div class="form-group">
+                                <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                                <input type="date" id="data_nascimento" name="data_nascimento" class="form-input"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="data_avaliacao" class="form-label">Data da Avaliação</label>
+                                <input type="date" id="data_avaliacao" name="data_avaliacao" class="form-input"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="sexo" class="form-label">Sexo</label>
+                                <select id="sexo" name="sexo" class="form-input" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="peso_kg" class="form-label">Peso (kg)</label>
+                                <input type="number" step="0.01" id="peso_kg" name="peso_kg" class="form-input"
+                                    placeholder="Ex: 25.5" required>
+                            </div>
+                            <div class="form-group col-span-2">
+                                <label for="altura_cm" class="form-label">Altura / Comprimento (cm)</label>
+                                <input type="number" step="0.1" id="altura_cm" name="altura_cm" class="form-input"
+                                    placeholder="Ex: 120.5" required>
+                            </div>
+                            <div class="form-group col-span-2 form-actions">
+                                <button type="button" id="clearIndividualForm" class="btn btn-secondary">Limpar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i data-lucide="calculator"></i>
+                                    Calcular e Avaliar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="loading-individual" class="loading-indicator" style="display: none;">Processando...</div>
+                    <div id="error-message-individual" class="error-container" style="display: none;"></div>
+
+                    <div class="page-card" id="individual-result-display" style="display: none;">
+                        <h3 class="card-title">Resultado da Avaliação Individual</h3>
+                        <div class="table-container">
+                            <table class="results-table">                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Idade</th>
+                                        <th>Data de Nascimento</th>
+                                        <th>Data da Avaliação</th>
+                                        <th>Peso (kg)</th>
+                                        <th>Peso/Idade</th>
+                                        <th>Altura (cm)</th>
+                                        <th>Altura/Idade</th>
+                                        <th>IMC</th>
+                                        <th>IMC/Idade</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="individual-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="lote-section" class="page-section">
+                    <div class="page-card">
+                        <h3 class="card-title">Avaliação de Múltiplos Indivíduos (Lote)</h3>
+                        <p class="card-subtitle">Importe um arquivo CSV ou TSV com os dados para uma avaliação rápida.
+                        </p>
+
+                        <form id="batchForm" class="space-y-4">
+                            <div>
+                                <label for="reportIdentifier" class="form-label">Escola / Comunidade</label>
+                                <input type="text" id="reportIdentifier" name="reportIdentifier" class="form-input"
+                                    placeholder="Ex: EMEI Criança Feliz" required>
+                            </div>
+                            <div>
+                                <label for="reportSubIdentifier" class="form-label">Turma / Grupo (Opcional)</label>
+                                <input type="text" id="reportSubIdentifier" name="reportSubIdentifier"
+                                    class="form-input" placeholder="Ex: Turma do 5º ano, Rua das Flores">
+                            </div>
+
+                            <div>
+                                <label class="form-label">Arquivo de Lote (.csv, .tsv)</label>
+                                <div class="flex items-center space-x-2">
+                                    <label for="batchFile" class="btn btn-secondary cursor-pointer">
+                                        <i data-lucide="upload"></i>
+                                        <span>Escolher arquivo</span>
+                                    </label>
+                                    <a href="{{ request.url_for('static', path='modelo/modelo_importacao.csv') }}"
+                                        download class="btn btn-outline">
+                                        <i data-lucide="download"></i>
+                                        <span>Baixar Modelo</span>
+                                    </a>
+                                </div>
+                                <input type="file" id="batchFile" name="batchFile" class="hidden" accept=".csv,.tsv">
+                                <div id="file-info-display" class="mt-2 text-sm text-gray-600"></div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i data-lucide="play-circle"></i>
+                                    <span>Processar Arquivo</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="loading-batch" class="loading-indicator" style="display: none;">Processando arquivo...
+                    </div>
+                    <div id="error-message-batch" class="error-container" style="display: none;"></div>
+
+                    <div class="page-card" id="batch-result-display" style="display: none;">
+                        <h3 class="card-title">Resultados do Processamento em Lote</h3>
+                        <div id="batch-summary" class="summary-box"></div>
+                        <div id="batch-actions" class="mt-4"></div>
+                        <div class="table-container">
+                            <table class="results-table">                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Idade</th>
+                                        <th>Data de Nascimento</th>
+                                        <th>Data da Avaliação</th>
+                                        <th>Peso (kg)</th>
+                                        <th>Peso/Idade</th>
+                                        <th>Altura (cm)</th>
+                                        <th>Altura/Idade</th>
+                                        <th>IMC</th>
+                                        <th>IMC/Idade</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="batch-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="batch-errors-display" style="display: none;" class="error-container">
+                            <h4 class="error-title">Detalhes dos Erros</h4>
+                            <ul id="batch-error-list" class="error-list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="relatorios-section" class="page-section">
+                    <div class="page-card">
+                        <h3 class="card-title">Relatório Nutricional (Exemplo)</h3>
+                        <div class="report-grid">
+                            <div class="chart-container">
+                                <canvas id="imcChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="configuracoes-section" class="page-section">
+                    <div class="page-card" style="max-width: 42rem;">
+                        <h3 class="card-title">Configurações da Aplicação</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label for="nome_usuario_config" class="form-label">Nome do Usuário (Exemplo)</label>
+                                <input type="text" id="nome_usuario_config" class="form-input" value="Usuário Padrão">
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary">Salvar Alterações (Exemplo)</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="footer">
+                <p>© <span id="currentYear"></span> LABDIS - UNIFESP. Aluno: João Paulo Oliveira Braga. Projeto de
+                    Iniciação Científica.</p>
+            </footer>
+        </div>
+    </div>
+
+    <div id="mobile-menu-overlay" class="mobile-menu-overlay">
+        <aside class="sidebar" id="mobile-sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="logo-icon">
+                        <path
+                            d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                        <path d="M3.22 12H9.5l.7-1.5L11.5 14l1.5-3 1.5 3h5.27" />
+                    </svg>
+                    <h1 class="logo-text">Nutri<span>Sis</span></h1>
+                </div>
+                <button id="close-menu" class="header-icon" aria-label="Fechar menu">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    Dashboard
+                </a>
+                <a href="#individual" class="nav-link" data-section="individual">
+                    <i data-lucide="user"></i>
+                    Avaliação Individual
+                </a>
+                <a href="#lote" class="nav-link" data-section="lote">
+                    <i data-lucide="users"></i>
+                    Avaliação em Lote
+                </a>
+                <a href="#relatorios" class="nav-link" data-section="relatorios">
+                    <i data-lucide="bar-chart-3"></i>
+                    Relatórios
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#configuracoes" class="nav-link" data-section="configuracoes">
+                    <i data-lucide="settings"></i>
+                    Configurações
+                </a>
+            </div>
+        </aside>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="{{ request.url_for('static', path='js/script.js') }}"></script>
 </body>
+
 </html>

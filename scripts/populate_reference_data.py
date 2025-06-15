@@ -10,8 +10,12 @@ from sqlalchemy.orm import Session
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.db.session import SessionLocal, engine, Base
-from app.models import TabelaReferenciaSISVAN, TabelaClassificacao, SexoEnumDB
+from app.models import TabelaReferenciaSISVAN, TabelaClassificacao
+# ...existing code...
+from app.models import SexoEnum  # Mudar de SexoEnumDB para SexoEnum
+# ...existing code...
 
+# E também alterar todas as referências no código de SexoEnumDB para SexoEnum
 # Diretório onde os arquivos CSV de dados estão localizados
 # Assume que este script (populate_reference_data.py) está na pasta 'scripts'
 # e os CSVs estão em 'data/sisvan_tables/'
@@ -41,7 +45,7 @@ def clear_table_data(db: Session, table_class):
         print(f"Erro ao limpar dados da tabela {table_name}: {e}")
         raise
 
-def populate_tabela_referencia_sisvan(db: Session, csv_filename: str, indicador: str, sexo_enum: SexoEnumDB, idade_inicial_meses: int):
+def populate_tabela_referencia_sisvan(db: Session, csv_filename: str, indicador: str, sexo_enum: SexoEnum, idade_inicial_meses: int):
     """
     Popula a TabelaReferenciaSISVAN com dados de um CSV específico.
     O CSV deve ter o cabeçalho '-3,-2,-1,0,1,2,3' e cada linha subsequente
@@ -157,7 +161,7 @@ def populate_tabela_classificacao(db: Session, csv_filename: str):
         with open(filepath, mode='r', encoding='utf-8-sig') as csvfile:
             # Usar DictReader para facilitar o acesso às colunas pelo nome do cabeçalho
             reader = csv.DictReader(csvfile)
-            if not reader.fieldnames or not all(f in reader.fieldnames for f in ['indicador', 'idade_min_meses', 'idade_max_meses', 'z_score_min', 'z_score_max', 'classificacao_pt']):
+            if not reader.fieldnames or not all(f in reader.fieldnames for f in ['indicador', 'idade_min_meses', 'idade_max_meses', 'z_score_min', 'z_score_max', 'classificacao']):
                 print(f"ERRO: Cabeçalho inválido ou ausente no arquivo de classificação '{csv_filename}'. Colunas esperadas incluem: 'indicador', 'idade_min_meses', etc.")
                 return
 
@@ -179,7 +183,7 @@ def populate_tabela_classificacao(db: Session, csv_filename: str):
                         sexo_aplicavel=sexo_val,
                         z_score_min=float(row['z_score_min'].strip().replace(',', '.')),
                         z_score_max=float(row['z_score_max'].strip().replace(',', '.')),
-                        classificacao_pt=row['classificacao_pt'].strip()
+                        classificacao=row['classificacao'].strip()
                     )
                     db.add(class_rule)
                     count_inserted += 1
@@ -230,29 +234,29 @@ if __name__ == "__main__":
         print("\n--- Iniciando população da TabelaReferenciaSISVAN ---")
         # PESO-PARA-IDADE (pi)
         # 0-59 meses (0 a <5 anos)
-        populate_tabela_referencia_sisvan(db, "pi_m_0a59m.csv",    "peso_idade", SexoEnumDB.MASCULINO, idade_inicial_meses=0)
-        populate_tabela_referencia_sisvan(db, "pi_f_0a59m.csv",    "peso_idade", SexoEnumDB.FEMININO,  idade_inicial_meses=0)
+        populate_tabela_referencia_sisvan(db, "pi_m_0a59m.csv",    "peso_idade", SexoEnum.M, idade_inicial_meses=0)
+        populate_tabela_referencia_sisvan(db, "pi_f_0a59m.csv",    "peso_idade", SexoEnum.F,  idade_inicial_meses=0)
         # 60-119 meses (5 a <10 anos) - SISVAN usa P/I até <10 anos
-        populate_tabela_referencia_sisvan(db, "pi_m_60a119m.csv",  "peso_idade", SexoEnumDB.MASCULINO, idade_inicial_meses=60)
-        populate_tabela_referencia_sisvan(db, "pi_f_60a119m.csv",  "peso_idade", SexoEnumDB.FEMININO,  idade_inicial_meses=60)
+        populate_tabela_referencia_sisvan(db, "pi_m_60a119m.csv",  "peso_idade", SexoEnum.M, idade_inicial_meses=60)
+        populate_tabela_referencia_sisvan(db, "pi_f_60a119m.csv",  "peso_idade", SexoEnum.F,  idade_inicial_meses=60)
 
         # ESTATURA-PARA-IDADE (ei)
         # 0-59 meses (0 a <5 anos)
-        populate_tabela_referencia_sisvan(db, "ei_m_0a59m.csv",    "estatura_idade", SexoEnumDB.MASCULINO, idade_inicial_meses=0)
-        populate_tabela_referencia_sisvan(db, "ei_f_0a59m.csv",    "estatura_idade", SexoEnumDB.FEMININO,  idade_inicial_meses=0)
+        populate_tabela_referencia_sisvan(db, "ei_m_0a59m.csv",    "estatura_idade", SexoEnum.M, idade_inicial_meses=0)
+        populate_tabela_referencia_sisvan(db, "ei_f_0a59m.csv",    "estatura_idade", SexoEnum.F,  idade_inicial_meses=0)
         # 60-228 meses (5 a 19 anos) - Idade 228 é 19 anos e 0 meses.
         # Se for "até 18 anos e 11 meses", a última idade é 227. Ajuste o nome do arquivo e a chamada.
-        populate_tabela_referencia_sisvan(db, "ei_m_60a228m.csv",  "estatura_idade", SexoEnumDB.MASCULINO, idade_inicial_meses=60)
-        populate_tabela_referencia_sisvan(db, "ei_f_60a228m.csv",  "estatura_idade", SexoEnumDB.FEMININO,  idade_inicial_meses=60)
+        populate_tabela_referencia_sisvan(db, "ei_m_60a228m.csv",  "estatura_idade", SexoEnum.M, idade_inicial_meses=60)
+        populate_tabela_referencia_sisvan(db, "ei_f_60a228m.csv",  "estatura_idade", SexoEnum.F,  idade_inicial_meses=60)
 
         # IMC-PARA-IDADE (imci)
         # 0-59 meses (0 a <5 anos)
-        populate_tabela_referencia_sisvan(db, "imci_m_0a59m.csv",  "imc_idade", SexoEnumDB.MASCULINO, idade_inicial_meses=0)
-        populate_tabela_referencia_sisvan(db, "imci_f_0a59m.csv",  "imc_idade", SexoEnumDB.FEMININO,  idade_inicial_meses=0)
+        populate_tabela_referencia_sisvan(db, "imci_m_0a59m.csv",  "imc_idade", SexoEnum.M, idade_inicial_meses=0)
+        populate_tabela_referencia_sisvan(db, "imci_f_0a59m.csv",  "imc_idade", SexoEnum.F,  idade_inicial_meses=0)
         # 60-228 meses (5 a 19 anos)
-        populate_tabela_referencia_sisvan(db, "imci_m_60a228m.csv","imc_idade", SexoEnumDB.MASCULINO, idade_inicial_meses=60)
-        populate_tabela_referencia_sisvan(db, "imci_f_60a228m.csv","imc_idade", SexoEnumDB.FEMININO,  idade_inicial_meses=60)
-        
+        populate_tabela_referencia_sisvan(db, "imci_m_60a228m.csv","imc_idade", SexoEnum.M, idade_inicial_meses=60)
+        populate_tabela_referencia_sisvan(db, "imci_f_60a228m.csv","imc_idade", SexoEnum.F,  idade_inicial_meses=60)
+
         print("--- População da TabelaReferenciaSISVAN concluída ---")
 
         # 5. Popule a TabelaClassificacao

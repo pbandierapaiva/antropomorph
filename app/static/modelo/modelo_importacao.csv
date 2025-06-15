@@ -1,0 +1,10 @@
+nome,data_nascimento,data_avaliacao,sexo,peso_kg,altura_cm
+
+exemplo de arquivo CSV para importação de dados de pacientes
+nome,data_nascimento,data_avaliacao,sexo,peso_kg,altura_cm
+João Silva,20/05/2020,15/06/2023,M,15.5,95.2 #ponto
+Maria Oliveira,10/01/2021,15/06/2023,F,"12,1","85,5" #virgula
+
+"O sistema aceitar ponto e virgula como sepador decimal dos numeros,
+tenha certeza de que se usar virgula nos numero adicionar aspas "" 
+como no modelo Maria Oliveira"
