@@ -16,12 +16,12 @@ peso_idade,60,120,,-999,-3,Muito baixo peso para idade
 peso_idade,60,120,,-3,-2,Baixo peso para idade
 peso_idade,60,120,,-2,2,Peso adequado para idade
 peso_idade,60,120,,2,999,Peso elevado para idade
-estatura_idade,60,120,,-999,-3,Muito baixa estatura para idade
-estatura_idade,60,120,,-3,-2,Baixa estatura para idade
-estatura_idade,60,120,,-2,999,Estatura adequada para idade
-imc_idade,60,120,,-999,-3,Magreza acentuada
-imc_idade,60,120,,-3,-2,Magreza
-imc_idade,60,120,,-2,1,Eutrofia
-imc_idade,60,120,,1,2,Sobrepeso
-imc_idade,60,120,,2,3,Obesidade
-imc_idade,60,120,,3,999,Obesidade grave
+estatura_idade,60,228,,-999,-3,Muito baixa estatura para idade
+estatura_idade,60,228,,-3,-2,Baixa estatura para idade
+estatura_idade,60,228,,-2,999,Estatura adequada para idade
+imc_idade,60,228,,-999,-3,Magreza acentuada
+imc_idade,60,228,,-3,-2,Magreza
+imc_idade,60,228,,-2,1,Eutrofia
+imc_idade,60,228,,1,2,Sobrepeso
+imc_idade,60,228,,2,3,Obesidade
+imc_idade,60,228,,3,999,Obesidade grave
