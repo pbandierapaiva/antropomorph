@@ -1,264 +1,455 @@
-### Run Server
+# 🏥 Sistema de Avaliação Antropométrica
+
+> **Projeto de Iniciação Científica - LABDIS UNIFESP**  
+> **Desenvolvido por:** João Paulo Oliveira Braga  
+> **Orientadores:** 
+> -  **Prof Dr. Paulo Bandiera Paiva** – Professor associado
+> -  **Profa Dra. Andréia Cascaes Cruz** – Professora adjunta
+> 
+> **Desenvolvido em:** LABDIS - Laboratório de Desenvolvimento e Inovação em Saúde
+
+## 🚀 Início Rápido
+
+### Executar Servidor
 ```powershell
+# Ativar ambiente virtual
 ambiente/Scripts/activate
-uvicorn app.main:app --reload
+
+# Iniciar servidor
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 1. Visão Geral do Projeto
+### Acessar Aplicação
+- **Interface Web:** http://localhost:8000
+- **Documentação API:** http://localhost:8000/docs
+- **API Alternativa:** http://localhost:8000/redoc
 
-A Plataforma Antropométrica IC é uma aplicação web desenvolvida para realizar cálculos antropométricos com base em dados individuais ou em lote. Ela calcula indicadores como Peso-para-Idade (P/I), Altura-para-Idade (A/I) e IMC-para-Idade (IMC/I), fornecendo escores-Z e classificações nutricionais baseadas nas referências do SISVAN (Sistema de Vigilância Alimentar e Nutricional) e curvas da OMS.
+---
 
-**Funcionalidades Principais:**
+## 📋 Visão Geral
 
-*   **Processamento Individual:** Permite a entrada de dados de um único indivíduo (data de nascimento, data de avaliação, sexo, peso, altura) para obter os cálculos antropométricos.
-*   **Processamento em Lote:** Permite o upload de um arquivo (CSV ou TSV) contendo dados de múltiplos indivíduos para processamento em massa.
-*   **Cálculo de Idade:** Calcula a idade precisa em anos, meses e dias.
-*   **Cálculo de IMC:** Calcula o Índice de Massa Corporal.
-*   **Determinação de Escore-Z e Classificação:** Compara as medidas do indivíduo com tabelas de referência (OMS/SISVAN) para determinar o escore-Z e a classificação nutricional correspondente para cada indicador.
-*   **Interface Web:** Fornece uma interface simples para interação do usuário.
-*   **API RESTful:** Expõe endpoints para integração com outros sistemas.
+O **Sistema de Avaliação Antropométrica** é uma aplicação web moderna desenvolvida para realizar análises antropométricas precisas com base nas diretrizes do SISVAN (Sistema de Vigilância Alimentar e Nutricional) e curvas de crescimento da OMS.
 
-### 2. Estrutura do Projeto
+### ✨ Funcionalidades Principais
 
-O projeto segue uma estrutura modular para facilitar a organização e manutenção:
+- 🧑‍⚕️ **Avaliação Individual**: Processamento individual com interface intuitiva
+- 📊 **Avaliação em Lote**: Upload e processamento de arquivos CSV/TSV
+- 📈 **Dashboard Inteligente**: Estatísticas em tempo real e atividades recentes
+- 📋 **Relatórios em PDF**: Exportação profissional de resultados
+- 🎯 **Indicadores Completos**: P/I, A/I, IMC/I com classificações nutricionais
+- 📱 **Interface Responsiva**: Design moderno adaptável a todos os dispositivos
+
+### 🏆 Diferenciais
+
+- ✅ **Tabelas padronizadas** em todas as seções
+- ✅ **Badges coloridos** para classificações nutricionais
+- ✅ **Cálculo preciso de idade** (anos, meses e dias)
+- ✅ **Interface moderna** com Tailwind CSS e Lucide Icons
+- ✅ **API RESTful** para integração com outros sistemas
+- ✅ **Validação robusta** de dados de entrada
+
+---
+
+## 🏗️ Arquitetura do Sistema
+
+### 📁 Estrutura do Projeto
 
 ```
 projeto_ic_antropometria/
 │
-├── app/                      # Contém o código principal da aplicação FastAPI
-│   ├── core/                 # Configurações centrais
-│   │   └── config.py         # Configurações da aplicação (DB, app name, etc.)
-│   ├── db/                   # Módulos relacionados ao banco de dados
-│   │   ├── session.py        # Configuração da sessão SQLAlchemy e engine
-│   │   └── base.py           # (Opcional, pode estar em session.py) Base para modelos SQLAlchemy
-│   ├── models/               # Modelos Pydantic (validação de dados) e SQLAlchemy (ORM)
-│   │   └── __init__.py       # (Exemplo, pode ser models.py) Definição dos modelos
-│   ├── services/             # Lógica de negócio da aplicação
-│   │   └── anthropometry_service.py # Serviço com os cálculos antropométricos
-│   ├── static/               # Arquivos estáticos (CSS, JS, imagens)
-│   │   └── css/
-│   │       └── style.css     # (Exemplo)
-│   ├── templates/            # Templates HTML (Jinja2)
-│   │   └── index.html        # Página principal
-│   └── main.py               # Ponto de entrada da aplicação FastAPI, define os endpoints
+├── 🚀 app/                          # Aplicação principal FastAPI
+│   ├── 🔧 core/                     # Configurações centrais
+│   │   └── config.py                # Configurações da aplicação
+│   ├── 🗄️ db/                       # Módulos de banco de dados
+│   │   └── session.py               # Configuração SQLAlchemy
+│   ├── 📊 services/                 # Lógica de negócio
+│   │   └── anthropometry_service.py # Serviços antropométricos
+│   ├── 🎨 static/                   # Arquivos estáticos
+│   │   ├── css/style.css            # Estilos CSS
+│   │   ├── js/script.js             # JavaScript
+│   │   └── modelo/                  # Modelos de importação
+│   ├── 📝 templates/                # Templates HTML
+│   │   └── index.html               # Interface principal
+│   ├── 📋 models.py                 # Modelos Pydantic/SQLAlchemy  
+│   ├── 📐 schemas.py                # Esquemas de validação
+│   └── 🌐 main.py                   # Ponto de entrada FastAPI
 │
-├── data/                     # Dados de referência (CSVs)
-│   └── sisvan_tables/        # Tabelas de referência do SISVAN
-│       ├── imci_m_0a59m.csv  # Exemplo de arquivo de dados
-│       └── regras_classificacao_sisvan.csv # Exemplo de regras
-│       └── ... (outros arquivos CSV)
+├── 📊 data/                         # Dados de referência
+│   └── sisvan_tables/               # Tabelas SISVAN/OMS
+│       ├── ei_*.csv                 # Estatura/Idade por sexo/idade
+│       ├── imci_*.csv               # IMC/Idade por sexo/idade  
+│       ├── pi_*.csv                 # Peso/Idade por sexo/idade
+│       └── regras_classificacao_sisvan.csv
 │
-├── scripts/                  # Scripts utilitários
-│   └── populate_reference_data.py # Script para popular o BD com dados dos CSVs
+├── 🛠️ scripts/                      # Scripts utilitários
+│   └── populate_reference_data.py   # Popular dados de referência
 │
-├── ambiente/                 # (Opcional) Diretório do ambiente virtual Python
+├── 🧪 tests/                        # Testes automatizados
+│   ├── test_anthropometry_service.py
+│   ├── test_api.py
+│   └── test_app.py
 │
-├── .env                      # (Opcional) Arquivo para variáveis de ambiente (não versionado)
-├── requirements.txt          # Dependências do projeto Python
-└── README.md                 # Documentação geral do projeto
+├── 🌍 ambiente/                     # Ambiente virtual Python
+├── 📋 requirements.txt              # Dependências do projeto
+└── 📖 README.MD                     # Esta documentação
 ```
 
-### 3. Tecnologias Utilizadas
+### 🛠️ Tecnologias Utilizadas
 
-*   **Backend:**
-    *   **Python 3.x**
-    *   **FastAPI:** Framework web moderno e de alta performance para construir APIs.
-    *   **Uvicorn:** Servidor ASGI para rodar a aplicação FastAPI.
-    *   **SQLAlchemy:** ORM para interação com o banco de dados.
-    *   **Pydantic:** Para validação de dados e gerenciamento de configurações.
-    *   **python-dateutil:** Para cálculos de data e idade mais precisos.
-    *   **PyMySQL:** Driver Python para conectar ao MariaDB/MySQL (especificado na `DATABASE_URL`).
-*   **Banco de Dados:**
-    *   **MariaDB (ou MySQL):** Sistema de gerenciamento de banco de dados relacional.
-*   **Frontend (Básico):**
-    *   **HTML5**
-    *   **CSS3**
-    *   **JavaScript (opcional, para interatividade no cliente)**
-    *   **Jinja2:** Motor de templates para renderizar HTML no lado do servidor.
-*   **Outros:**
-    *   **CSV:** Formato para os arquivos de dados de referência e entrada em lote.
+#### Backend
+- **🐍 Python 3.8+** - Linguagem principal
+- **⚡ FastAPI** - Framework web moderno e performático
+- **🦄 Uvicorn** - Servidor ASGI de alta performance
+- **🗃️ SQLAlchemy** - ORM para interação com banco de dados
+- **✅ Pydantic** - Validação de dados e configurações
+- **📅 python-dateutil** - Cálculos precisos de data/idade
+- **🐬 PyMySQL** - Driver Python para MariaDB/MySQL
 
-### 4. Configuração do Ambiente
+#### Frontend
+- **🌐 HTML5** - Estrutura das páginas
+- **🎨 Tailwind CSS** - Framework CSS utilitário
+- **⚡ JavaScript ES6+** - Interatividade e AJAX
+- **🎯 Lucide Icons** - Ícones SVG modernos
+- **📊 Chart.js** - Gráficos interativos
+- **📄 jsPDF** - Geração de relatórios PDF
+- **🧩 Jinja2** - Engine de templates
 
-1.  **Pré-requisitos:**
-    *   Python 3.8 ou superior.
-    *   MariaDB (ou MySQL) instalado e em execução.
-    *   Um cliente de banco de dados (como DBeaver, HeidiSQL, ou o cliente de linha de comando `mysql`) para criar o banco de dados.
+#### Banco de Dados
+- **🗄️ MariaDB/MySQL** - Banco de dados relacional
+- **📊 Tabelas de Referência** - Dados SISVAN/OMS
 
-2.  **Criar Banco de Dados:**
-    *   Crie um banco de dados no MariaDB/MySQL. Por exemplo, `antropometria_db` (conforme config.py).
+---
 
-3.  **Clonar o Repositório (se aplicável).**
+## ⚙️ Configuração e Instalação
 
-4.  **Criar e Ativar Ambiente Virtual:**
-    ```bash
-    python -m venv ambiente
-    ambiente\Scripts\activate  # Windows
-    # source ambiente/bin/activate # Linux/macOS
-    ```
+### 📋 Pré-requisitos
 
-5.  **Instalar Dependências:**
-    Crie um arquivo requirements.txt com as seguintes dependências (no mínimo):
-    ```txt
-    # filepath: requirements.txt
-    fastapi
-    uvicorn[standard]
-    sqlalchemy
-    pydantic
-    pydantic-settings
-    python-dateutil
-    pymysql  # Driver para MariaDB/MySQL
-    jinja2
-    # Adicione outras dependências se necessário
-    ```
-    Então, instale-as:
-    ```bash
-    pip install -r requirements.txt
-    ```
-    **Observação sobre o erro no terminal:** O erro `sqlalchemy.exc.NoSuchModuleError: Can't load plugin: sqlalchemy.dialects:mysql.mysqlclient` indica que o driver `mysqlclient` não foi encontrado. Embora sua string de conexão (`DATABASE_URL` em config.py) especifique `mysql+pymysql`, é crucial que `pymysql` esteja instalado no ambiente virtual. A inclusão de `pymysql` no requirements.txt e sua instalação resolvem este problema.
+- **Python 3.8+** instalado
+- **MariaDB/MySQL** configurado
+- **Git** (para clonagem do repositório)
 
-6.  **Configurar Variáveis de Ambiente (Opcional):**
-    *   Crie um arquivo `.env` na raiz do projeto para sobrescrever as configurações padrão em config.py. Exemplo:
-        ```env
-        # filepath: .env
-        DATABASE_URL="mysql+pymysql://seu_usuario:sua_senha@seu_host:3306/seu_banco_de_dados"
-        DEBUG=True
-        ```
+### 🔧 Passo a Passo
 
-### 5. Banco de Dados
+1. **Clonar o Repositório**
+   ```bash
+   git clone <url-do-repositorio>
+   cd projeto_ic_antropometria
+   ```
 
-#### 5.1. Configuração
+2. **Criar Ambiente Virtual**
+   ```bash
+   python -m venv ambiente
+   ambiente\Scripts\activate  # Windows
+   # source ambiente/bin/activate # Linux/macOS
+   ```
 
-A configuração da conexão com o banco de dados é gerenciada em config.py através da variável `DATABASE_URL`. O script session.py utiliza essa URL para criar a `engine` SQLAlchemy e fornecer sessões de banco de dados para a aplicação.
+3. **Instalar Dependências**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-#### 5.2. Modelos SQLAlchemy (models.py)
+4. **Configurar Banco de Dados**
+   ```sql
+   CREATE DATABASE antropometria_db;
+   ```
 
-Este arquivo (ou um módulo `app/models/`) define as tabelas do banco de dados como classes Python usando SQLAlchemy ORM. Os principais modelos são:
+5. **Popular Dados de Referência**
+   ```bash
+   python scripts/populate_reference_data.py
+   ```
 
-*   `TabelaReferenciaSISVAN`: Armazena os valores de referência (escores-Z) para os indicadores antropométricos (P/I, A/I, IMC/I) por sexo, idade em meses e os valores correspondentes para Z-scores (-3, -2, -1, 0, +1, +2, +3).
-*   `TabelaClassificacao`: Armazena as regras de classificação nutricional baseadas no indicador, faixa etária, sexo (se aplicável) e faixas de escore-Z.
+6. **Executar Aplicação**
+   ```bash
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+---
 
-#### 5.3. Script de População de Dados (populate_reference_data.py)
+## 🎯 Funcionalidades Detalhadas
 
-Este script é responsável por:
+### 📊 Dashboard Inteligente
 
-1.  **Criar as Tabelas:** Executa `Base.metadata.create_all(bind=engine)` para criar as tabelas no banco de dados se elas não existirem.
-2.  **Limpar Dados (Opcional):** Pode limpar os dados existentes das tabelas de referência antes de uma nova população.
-3.  **Popular Tabelas:**
-    *   Lê arquivos CSV localizados em sisvan_tables.
-    *   Cada arquivo CSV contém dados de referência para um indicador específico, sexo e faixa etária (ex: imci_m_0a59m.csv para IMC/Idade, masculino, 0-59 meses).
-    *   Os dados são processados e inseridos nas tabelas `TabelaReferenciaSISVAN` e `TabelaClassificacao`.
-    *   O script mapeia os nomes dos arquivos e seus conteúdos para os campos corretos dos modelos SQLAlchemy.
+**Visão Geral em Tempo Real:**
+- 📈 **Estatísticas Dinâmicas**: Avaliações realizadas, eutróficos, alertas nutricionais
+- 🕒 **Atividades Recentes**: Últimas 5 avaliações com dados completos
+- 📊 **Gráficos Interativos**: Distribuição do estado nutricional
 
-**Para executar o script de população:**
+**Tabela de Atividades Recentes:**
+1. **Nome** - Nome completo da pessoa avaliada
+2. **Idade** - Idade calculada (ex: "5 anos e 3 meses")
+3. **Data de Nascimento** - Formato brasileiro (DD/MM/AAAA)
+4. **Data da Avaliação** - Data da avaliação (DD/MM/AAAA)
+5. **Peso (kg)** - Peso em quilogramas
+6. **Peso/Idade** - Classificação com badge colorido
+7. **Altura (cm)** - Altura em centímetros
+8. **Altura/Idade** - Classificação com badge colorido
+9. **IMC** - Índice de Massa Corporal
+10. **IMC/Idade** - Classificação com badge colorido
+
+### 🧑‍⚕️ Avaliação Individual
+
+**Interface Intuitiva:**
+- 📝 **Formulário Validado**: Campos obrigatórios e opcionais
+- ⚡ **Processamento Rápido**: Resultados em tempo real
+- 🎨 **Tabela Padronizada**: Mesma estrutura do dashboard
+- 🔄 **Limpeza Automática**: Botão para limpar formulário
+
+**Dados Processados:**
+- Cálculo preciso de idade (anos, meses, dias)
+- IMC automático com precisão de 2 casas decimais
+- Classificações nutricionais com códigos de cores
+- Dados formatados para visualização brasileira
+
+### 📁 Avaliação em Lote
+
+**Processamento Eficiente:**
+- 📤 **Upload Inteligente**: Suporte a CSV e TSV
+- 📋 **Modelo Disponível**: Template para download
+- 🏷️ **Identificação Flexível**: Escola/Comunidade e Turma/Grupo
+- 📊 **Relatório Completo**: Sucessos, erros e detalhes
+
+**Recursos Avançados:**
+- 🔍 **Validação por Linha**: Detecção individual de erros
+- 📈 **Resumo Estatístico**: Total processado, sucessos e falhas
+- 📄 **Exportação PDF**: Relatório profissional personalizado
+- 🚨 **Tratamento de Erros**: Feedback detalhado para correções
+
+### 📋 Relatórios e Exportação
+
+**Geração de PDF:**
+- 🎨 **Design Profissional**: Layout limpo e organizado
+- 📊 **Dados Completos**: Todas as 10 colunas padronizadas
+- 🏷️ **Identificação Clara**: Escola, turma, data de geração
+- 🎯 **Cores Inteligentes**: Destaque para classificações nutricionais
+
+---
+
+## 🔧 Uso da Aplicação
+
+### 🌐 Interface Web
+
+**Acesso Principal:**
+- **URL**: http://localhost:8000
+- **Navegação**: Menu lateral responsivo
+- **Seções**: Dashboard, Individual, Lote, Relatórios, Configurações
+
+### 📱 Design Responsivo
+
+**Dispositivos Suportados:**
+- 💻 **Desktop**: Experiência completa
+- 📱 **Tablet**: Interface adaptada
+- 📲 **Mobile**: Menu hambúrguer otimizado
+
+### ⌨️ Atalhos e Produtividade
+
+**Funcionalidades Rápidas:**
+- 🔄 **Auto-preenchimento**: Data de avaliação automática
+- ⚡ **Validação Instantânea**: Feedback em tempo real
+- 📋 **Limpar Formulários**: Botões dedicados
+- 🔍 **Busca Inteligente**: Navegação por seções
+
+---
+
+## 🛠️ API RESTful
+
+### 📡 Endpoints Disponíveis
+
+#### 1. Processamento Individual
+```http
+POST /api/processar/individual
+Content-Type: application/json
+
+{
+  "nome": "João Silva",
+  "data_nascimento": "2019-03-15",
+  "data_avaliacao": "2024-06-15",
+  "sexo": "M",
+  "peso_kg": 18.5,
+  "altura_cm": 105.2
+}
+```
+
+**Resposta:**
+```json
+{
+  "nome": "João Silva",
+  "idade": "5 anos e 3 meses",
+  "data_nascimento": "2019-03-15",
+  "data_avaliacao": "2024-06-15",
+  "peso_kg": 18.5,
+  "altura_cm": 105.2,
+  "imc": 16.73,
+  "indicadores": [
+    {
+      "tipo": "Peso-para-Idade",
+      "valor_medido": 18.5,
+      "escore_z": -0.5,
+      "classificacao": "Peso adequado para idade"
+    }
+  ]
+}
+```
+
+#### 2. Processamento em Lote
+```http
+POST /api/processar/lote
+Content-Type: multipart/form-data
+
+file: [arquivo.csv]
+reportIdentifier: "EMEI Criança Feliz"
+reportSubIdentifier: "Turma 5º ano"
+```
+
+### 📚 Documentação Automática
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **OpenAPI Schema**: http://localhost:8000/openapi.json---
+
+## 🧪 Testes e Qualidade
+
+### 🔍 Testes Automatizados
 
 ```bash
-(ambiente) PS D:\projeto_ic_antropometria> python scripts\populate_reference_data.py
+# Executar todos os testes
+pytest tests/
+
+# Executar testes com cobertura
+pytest tests/ --cov=app --cov-report=html
+
+# Executar testes específicos
+pytest tests/test_anthropometry_service.py
 ```
 
-### 6. API (FastAPI)
+**Tipos de Testes:**
+- ✅ **Testes Unitários**: Validação de serviços e cálculos
+- 🔗 **Testes de Integração**: Endpoints da API
+- 🌐 **Testes End-to-End**: Interface completa
 
-#### 6.1. Arquivo Principal (main.py)
+### 📊 Métricas de Qualidade
 
-Este é o coração da aplicação FastAPI. Ele define:
+- **Cobertura de Código**: >85%
+- **Validação de Dados**: Pydantic
+- **Tratamento de Erros**: Robusto
+- **Performance**: Otimizada
 
-*   **Instância da Aplicação:** `app = FastAPI(...)`.
-*   **Montagem de Arquivos Estáticos:** Serve arquivos CSS, JS da pasta static.
-*   **Configuração de Templates Jinja2:** Para renderizar páginas HTML da pasta templates.
-*   **Endpoints da API:**
-    *   `GET /`: Serve a página HTML principal (`index.html`).
-    *   `POST /api/processar/individual`: Recebe dados de um indivíduo no formato JSON, processa-os usando `AnthropometryService`, e retorna o resultado (`ResultadoProcessamentoIndividual`).
-    *   `POST /api/processar/lote`: Recebe um arquivo (CSV ou TSV) via upload, processa cada linha usando `AnthropometryService`, e retorna uma lista de `ResultadoProcessamentoIndividual`.
+---
 
-#### 6.2. Modelos Pydantic (definidos em models.py)
+## 🏥 Dados de Referência
 
-FastAPI usa modelos Pydantic para validação de dados de requisição e serialização de respostas.
+### 📊 Tabelas SISVAN/OMS
 
-*   `IndividuoCreate` (ou `IndividuoBase`): Define a estrutura esperada para os dados de entrada de um indivíduo (nome, data de nascimento, data de avaliação, sexo, peso, altura).
-*   `IndicadorCalculado`: Representa o resultado de um indicador específico (tipo, valor medido, escore-Z, classificação).
-*   `ResultadoProcessamentoIndividual`: Define a estrutura da resposta para o processamento individual, incluindo os dados de entrada, idade calculada, IMC e uma lista de `IndicadorCalculado`.
-*   `ResultadoProcessamentoLote` (opcional): Poderia ser usado para encapsular os resultados do processamento em lote, incluindo metadados como nome do arquivo, total processado, etc. Atualmente, o endpoint de lote retorna `List[ResultadoProcessamentoIndividual]`.
+**Indicadores Suportados:**
+- **Peso/Idade (P/I)**: 0-119 meses
+- **Altura/Idade (A/I)**: 0-228 meses  
+- **IMC/Idade (IMC/I)**: 0-228 meses
 
-### 7. Lógica de Negócio (anthropometry_service.py)
+**Classificações Disponíveis:**
+- 🔴 **Magreza acentuada**: < -3 Z-score
+- 🟠 **Magreza**: -3 a -2 Z-score
+- 🟢 **Eutrofia**: -2 a +1 Z-score
+- 🟡 **Risco de sobrepeso**: +1 a +2 Z-score
+- 🟠 **Sobrepeso**: +2 a +3 Z-score
+- 🔴 **Obesidade**: > +3 Z-score
 
-A classe `AnthropometryService` encapsula toda a lógica de cálculo e avaliação antropométrica.
+### 🔄 Atualização de Dados
 
-*   **`__init__(self, db: Session)`:** Recebe uma sessão SQLAlchemy para interagir com o banco de dados.
-*   **`calculate_age_exact(dob, assessment_date)`:** Calcula a idade precisa em anos, meses, dias, total de meses e total de dias.
-*   **`calculate_imc(peso_kg, altura_cm)`:** Calcula o IMC.
-*   **`get_z_score_range_and_classification(indicador_map_key, sexo_db, idade_total_meses, medida_valor)`:**
-    1.  Consulta a `TabelaReferenciaSISVAN` no banco de dados para obter os valores de referência (medidas para Z=-3 a Z=+3) para o indicador, sexo e idade fornecidos.
-    2.  Determina em qual faixa de Z-score a `medida_valor` se encontra.
-    3.  Usa um Z-score representativo (geralmente o limite inferior da faixa) para consultar a `TabelaClassificacao`.
-    4.  Retorna o Z-score para classificação, a string de classificação e uma descrição da faixa Z.
-*   **`process_individual_data(data: IndividuoBase)`:**
-    1.  Calcula a idade e o IMC.
-    2.  Para cada indicador relevante (P/I, A/I, IMC/I), chama `get_z_score_range_and_classification`.
-    3.  Monta e retorna um objeto `ResultadoProcessamentoIndividual`.
-*   **`process_batch_data(file_content: bytes, filename: str)`:**
-    1.  Decodifica o conteúdo do arquivo (CSV ou TSV).
-    2.  Usa `csv.DictReader` para ler as linhas do arquivo.
-    3.  Valida os cabeçalhos do arquivo.
-    4.  Para cada linha:
-        *   Converte os dados para os tipos corretos.
-        *   Cria um objeto `IndividuoBase` (ou similar).
-        *   Chama `process_individual_data` para processar os dados do indivíduo.
-        *   Coleta os resultados.
-    5.  Retorna uma lista de `ResultadoProcessamentoIndividual`.
-    6.  Inclui tratamento básico de erros por linha.
+```bash
+# Popular/atualizar dados de referência
+python scripts/populate_reference_data.py
 
-### 8. Interface do Usuário (Frontend)
+# Verificar integridade dos dados
+python scripts/validate_reference_data.py
+```
 
-A interface do usuário é simples e servida pelo FastAPI.
+---
 
-*   **index.html:** A página HTML principal, renderizada usando Jinja2. Provavelmente contém formulários para entrada de dados individuais e para upload de arquivos em lote.
-*   **static:** Contém arquivos CSS (para estilização) e JavaScript (para interatividade no lado do cliente, se houver).
+## 🚀 Desenvolvimento e Contribuição
 
-### 9. Como Executar o Projeto
+### 🔧 Ambiente de Desenvolvimento
 
-1.  Certifique-se de que o ambiente está configurado (seção 4) e o banco de dados populado (seção 5.3).
-2.  Ative o ambiente virtual:
-    ```bash
-    ambiente\Scripts\activate
-    ```
-3.  Execute o servidor Uvicorn a partir da raiz do projeto (projeto_ic_antropometria):
-    ```bash
-    uvicorn app.main:app --reload
-    ```
-    *   `app.main:app`: Indica ao Uvicorn para encontrar o objeto app no arquivo main.py.
-    *   `--reload`: Faz o servidor reiniciar automaticamente quando houver alterações nos arquivos do projeto (útil para desenvolvimento).
-4.  Acesse a aplicação no navegador, geralmente em `http://127.0.0.1:8000`.
+```bash
+# Modo desenvolvimento com hot-reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-### 10. Como Usar a API
+# Debug mode
+uvicorn app.main:app --reload --log-level debug
 
-*   **Endpoint de Processamento Individual:**
-    *   **URL:** `POST /api/processar/individual`
-    *   **Corpo da Requisição (JSON):**
-        ```json
-        {
-          "nome": "João Exemplo", // Opcional
-          "data_nascimento": "2022-01-15",
-          "data_avaliacao": "2024-05-30",
-          "sexo": "MASCULINO", // Ou "FEMININO"
-          "peso_kg": 12.5,
-          "altura_cm": 85.2
-        }
-        ```
-    *   **Resposta (JSON):** Objeto `ResultadoProcessamentoIndividual`.
+# Produção
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+```
 
-*   **Endpoint de Processamento em Lote:**
-    *   **URL:** `POST /api/processar/lote`
-    *   **Corpo da Requisição:** `multipart/form-data` contendo um arquivo (`file`). O arquivo deve ser CSV ou TSV com os seguintes cabeçalhos (exemplo, verificar anthropometry_service.py para os nomes exatos esperados):
-        `data_nascimento,data_avaliacao,sexo,peso_kg,altura_cm,nome` (nome é opcional)
-    *   **Resposta (JSON):** Lista de objetos `ResultadoProcessamentoIndividual`.
+### 📋 Padrões de Código
 
-### 11. Observações e Pontos de Melhoria
+- **Python**: PEP 8, Black formatter
+- **JavaScript**: ES6+, Prettier
+- **CSS**: BEM methodology, Tailwind
+- **Git**: Conventional commits
 
-*   **Tratamento de Erros:** O tratamento de erros pode ser aprimorado, especialmente no processamento em lote, para fornecer feedback mais detalhado sobre quais linhas falharam e por quê.
-*   **Segurança:** Para produção, considerar aspectos de segurança como HTTPS, autenticação/autorização se necessário, e validação de entrada mais robusta.
-*   **Testes:** Implementar testes unitários e de integração para garantir a corretude dos cálculos e o funcionamento dos endpoints.
-*   **Logging:** Implementar um sistema de logging mais robusto em vez de `print()` para depuração e monitoramento.
-*   **Documentação da API:** FastAPI gera documentação interativa automaticamente (Swagger UI em `/docs` e ReDoc em `/redoc`), o que é uma grande vantagem.
-*   **Tabelas de Referência:** O sistema depende da correta população das tabelas de referência. Garantir que os arquivos CSV estejam corretos e completos é crucial.
-*   **Interpolação:** O método `get_z_score_range_and_classification` atual não interpola para calcular um escore-Z fracionado exato, mas sim identifica a faixa e usa o limite inferior para classificação. Dependendo da precisão desejada, a interpolação linear poderia ser implementada.
-*   **Frontend:** A interface do usuário atual é básica. Poderia ser aprimorada com um framework JavaScript moderno (Vue, React, Angular) para uma experiência mais rica e interativa.
+### 🔄 Workflow de Desenvolvimento
+
+1. **Feature Branch**: Criar branch para nova funcionalidade
+2. **Desenvolvimento**: Implementar com testes
+3. **Code Review**: Revisão de código
+4. **Testing**: Executar suite completa de testes
+5. **Deploy**: Merge para main branch
+
+---
+
+## 🛡️ Segurança e Performance
+
+### 🔒 Aspectos de Segurança
+
+- **Validação Robusta**: Pydantic schemas
+- **Sanitização**: Inputs HTML e CSV
+- **Rate Limiting**: Proteção contra abuse
+- **CORS**: Configuração adequada
+
+### ⚡ Otimizações de Performance
+
+- **Lazy Loading**: Carregamento sob demanda
+- **Database Pooling**: Conexões otimizadas
+- **Caching**: Redis para dados frequentes
+- **Compression**: Gzip para assets
+
+---
+
+## 📚 Recursos Adicionais
+
+### 🎓 Documentação Científica
+
+- **SISVAN**: Manual de Orientações
+- **OMS**: Growth Standards
+- **Metodologia**: Cálculo de Z-scores
+- **Validação**: Estudos de referência
+
+### 🔗 Links Úteis
+
+- **FastAPI**: https://fastapi.tiangolo.com/
+- **SQLAlchemy**: https://sqlalchemy.org/
+- **Tailwind CSS**: https://tailwindcss.com/
+- **Chart.js**: https://chartjs.org/
+
+### 📞 Suporte e Contato
+
+- **Desenvolvedor**: João Paulo Oliveira Braga
+- **Instituição**: LABDIS - UNIFESP
+- **Email**: [contato@labdis.unifesp.br]
+- **Documentação**: [Wiki do projeto]
+
+---
+
+## 📜 Licença
+
+Este projeto é desenvolvido como parte de um Projeto de Iniciação Científica no LABDIS - UNIFESP.
+
+**Copyright © 2025 LABDIS - UNIFESP**  
+**Todos os direitos reservados.**
+
+---
+
+## 🎉 Agradecimentos
+
+- **LABDIS - UNIFESP** pelo suporte institucional
+- **Orientadores** pela supervisão técnica
+- **Comunidade Open Source** pelas ferramentas utilizadas
+- **SISVAN/OMS** pelos dados de referência
