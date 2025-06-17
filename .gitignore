@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Arquivo com senhas
+app/core/config.py 
+
 # C extensions
 *.so
 
