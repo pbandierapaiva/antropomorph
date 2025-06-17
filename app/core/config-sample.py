@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     # Configurações do Banco de Dados MariaDB
     # Substitua com suas credenciais e detalhes do MariaDB
     # Exemplo: "mysql+mysqlclient://user:password@host:port/dbname"
-    DATABASE_URL: Optional[str] = "mysql+pymysql://root:SENHASECRETA@localhost:3306/antropometria_db"
+    DATABASE_URL: Optional[str] = "mysql+pymysql://root:@localhost:3306/antropometria_db"
 
     # SISVAN reference tables - nomes das tabelas que você criará
     # Estes são exemplos, você precisará definir os nomes corretos
