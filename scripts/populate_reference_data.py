@@ -226,8 +226,8 @@ if __name__ == "__main__":
     try:
         # 3. Opcional: Limpar dados das tabelas antes de popular novamente
         # Descomente se quiser recarregar tudo do zero.
-        # clear_table_data(db, TabelaReferenciaSISVAN)
-        # clear_table_data(db, TabelaClassificacao)
+        clear_table_data(db, TabelaReferenciaSISVAN)
+        clear_table_data(db, TabelaClassificacao)
         # print("Todas as tabelas de referência foram limpas.")
 
         # 4. Popule a TabelaReferenciaSISVAN (valores Z)

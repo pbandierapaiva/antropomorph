@@ -15,6 +15,7 @@ class SexoEnum(str, Enum):
     F = "F"
 
 class IndividuoBase(BaseModel):
+    id_paciente: Optional[str] = None  # Campo opcional para identificação (SUS, CPF, etc.)
     nome: Optional[str] = None
     data_nascimento: date
     data_avaliacao: date
@@ -23,6 +24,7 @@ class IndividuoBase(BaseModel):
     altura_cm: Decimal = Field(..., gt=0, description="Altura em centímetros")
 
 class IndividuoCreate(BaseModel):
+    id_paciente: Optional[str] = None  # Campo opcional para identificação (SUS, CPF, etc.)
     nome: str
     data_nascimento: date
     data_avaliacao: date  # <-- CAMPO ADICIONADO AQUI
@@ -37,6 +39,7 @@ class Indicador(BaseModel):
     classificacao: str
 
 class ResultadoProcessamentoIndividual(BaseModel):
+    id_paciente: Optional[str] = None  # Campo opcional para identificação
     nome: str
     sexo: str
     data_nascimento: date
@@ -52,9 +55,20 @@ class ErroLinha(BaseModel):
     erro: str
     dados_originais: Dict[str, Any]
 
+class BatchProcessingResponse(BaseModel):
+    """Resposta padronizada para processamento em lote"""
+    success: bool
+    summary: dict
+    results: List[ResultadoProcessamentoIndividual]
+    errors: List[ErroLinha]
+
 class ReportData(BaseModel):
-    success_results: List[ResultadoProcessamentoIndividual]
-    error_results: List[ErroLinha]
+    identifier: str
+    sub_identifier: Optional[str] = None
+    batch_results: BatchProcessingResponse
+    
+    class Config:
+        from_attributes = True
 
 
 # --- Modelos SQLAlchemy (Tabelas do Banco de Dados) ---

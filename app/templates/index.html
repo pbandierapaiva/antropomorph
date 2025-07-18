@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 
 
@@ -35,16 +35,12 @@
             </div>
             <nav class="sidebar-nav">
                 <a href="#dashboard" class="nav-link active" data-section="dashboard">
-                    <i data-lucide="layout-dashboard"></i>
-                    Dashboard
+                    <i data-lucide="home"></i>
+                    Boas-vindas
                 </a>
-                <a href="#individual" class="nav-link" data-section="individual">
-                    <i data-lucide="user"></i>
-                    Avaliação Individual
-                </a>
-                <a href="#lote" class="nav-link" data-section="lote">
-                    <i data-lucide="users"></i>
-                    Avaliação em Lote
+                <a href="#avaliacao" class="nav-link" data-section="avaliacao">
+                    <i data-lucide="calculator"></i>
+                    Avaliação Antropométrica
                 </a>
                 <a href="#relatorios" class="nav-link" data-section="relatorios">
                     <i data-lucide="bar-chart-3"></i>
@@ -65,7 +61,7 @@
                     <button id="menu-toggle" class="header-icon">
                         <i data-lucide="menu"></i>
                     </button>
-                    <h2 id="page-title" class="page-title">Dashboard</h2>
+                    <h2 id="page-title" class="page-title">Boas-vindas</h2>
                 </div>
                 <div class="header-right">
                     <button class="header-icon" aria-label="Notificações">
@@ -85,197 +81,331 @@
             <main class="main-content">
 
                 <section id="dashboard-section" class="page-section active-section">
-                    <div class="dashboard-grid">
-                        <div class="card stat-card">
-                            <div class="stat-card-icon bg-sky-100 text-sky-600"><i data-lucide="scan-line"></i></div>
-                            <div class="stat-card-info">
-                                <p>Avaliações Realizadas</p>
-                                <p id="stat-avaliacoes">0</p>
+                    <div class="welcome-container">
+                        <!-- Hero Section -->
+                        <div class="card welcome-hero">
+                            <div class="welcome-content">
+                                <h1 class="welcome-title">
+                                    <i data-lucide="heart-pulse"></i>
+                                    Bem-vindo ao Sistema de Avaliação Antropométrica
+                                </h1>
+                                <p class="welcome-subtitle">
+                                    Uma ferramenta desenvolvida para auxiliar profissionais de saúde na avaliação
+                                    nutricional de crianças e adolescentes
+                                </p>
+                            </div>
+                            <div class="welcome-logo">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" class="welcome-icon">
+                                    <path
+                                        d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                                    <path d="M3.22 12H9.5l.7-1.5L11.5 14l1.5-3 1.5 3h5.27" />
+                                </svg>
                             </div>
                         </div>
 
-                        <div class="card stat-card">
-                            <div class="stat-card-icon bg-emerald-100 text-emerald-600"><i data-lucide="smile"></i>
-                            </div>
-                            <div class="stat-card-info">
-                                <p>Eutróficos (IMC/I)</p>
-                                <p id="stat-eutroficos">0</p>
-                            </div>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-card-icon bg-amber-100 text-amber-600"><i data-lucide="alert-triangle"></i>
-                            </div>
-                            <div class="stat-card-info">
-                                <p>Alertas Nutricionais</p>
-                                <p id="stat-alertas">0</p>
+                        <!-- About Project Section -->
+                        <div class="card">
+                            <h2 class="section-title">
+                                <i data-lucide="info"></i>
+                                Sobre o Projeto
+                            </h2>
+                            <div class="project-description">
+                                <p>
+                                    Este sistema foi desenvolvido como parte de um projeto de Iniciação Científica na
+                                    <strong>UNIFESP</strong> (Universidade Federal de São Paulo),
+                                    no âmbito do <strong>LabDIS</strong> (Laboratório de Informática em Saúde), com o
+                                    objetivo de facilitar a avaliação antropométrica
+                                    de crianças e adolescentes.
+                                </p>
+                                <p>
+                                    A ferramenta utiliza as <strong>curvas de crescimento da OMS</strong> e as
+                                    <strong>tabelas de referência do SISVAN</strong>
+                                    (Sistema de Vigilância Alimentar e Nutricional) para fornecer diagnósticos
+                                    nutricionais precisos baseados nos indicadores:
+                                </p>
+                                <ul class="feature-list">
+                                    <li><i data-lucide="check-circle"></i> <strong>Peso para Idade (P/I)</strong> -
+                                        Avalia o peso em relação à idade</li>
+                                    <li><i data-lucide="check-circle"></i> <strong>Altura para Idade (A/I)</strong> -
+                                        Avalia o crescimento linear</li>
+                                    <li><i data-lucide="check-circle"></i> <strong>IMC para Idade (IMC/I)</strong> -
+                                        Avalia o estado nutricional atual</li>
+                                </ul>
                             </div>
                         </div>
 
-                        <div class="card stat-card" , style="
-    margin-bottom: 24px;">
-                            <div class="stat-card-icon bg-rose-100 text-rose-600"><i data-lucide="frown"></i></div>
-                            <div class="stat-card-info">
-                                <p>Desnutrição/Sobrepeso</p>
-                                <p id="stat-desvios">0</p>
+                        <!-- Tutorial Section -->
+                        <div class="card">
+                            <h2 class="section-title">
+                                <i data-lucide="book-open"></i>
+                                Como Usar o Sistema
+                            </h2>
+                            <div class="tutorial-content">
+                                <div class="tutorial-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h3>Acesse a Avaliação Antropométrica</h3>
+                                        <p>Clique no menu "Avaliação Antropométrica" na barra lateral para começar a
+                                            usar o sistema.</p>
+                                    </div>
+                                </div>
+
+                                <div class="tutorial-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h3>Escolha o Método de Entrada</h3>
+                                        <p>Você pode processar dados de duas formas:</p>
+                                        <ul>
+                                            <li><strong>Importar CSV/TSV:</strong> Carregue um arquivo com dados de
+                                                múltiplas pessoas</li>
+                                            <li><strong>Entrada Manual:</strong> Adicione pessoas individualmente
+                                                através do formulário</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="tutorial-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <h3>Preencha as Informações</h3>
+                                        <p>Para cada pessoa, forneça:</p>
+                                        <ul>
+                                            <li>ID do Paciente (opcional - SUS, CPF, etc.)</li>
+                                            <li>Nome completo (opcional)</li>
+                                            <li>Data de nascimento</li>
+                                            <li>Data da avaliação</li>
+                                            <li>Sexo (Masculino/Feminino)</li>
+                                            <li>Peso em quilogramas</li>
+                                            <li>Altura em centímetros</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="tutorial-step">
+                                    <div class="step-number">4</div>
+                                    <div class="step-content">
+                                        <h3>Visualize os Resultados</h3>
+                                        <p>O sistema processará automaticamente os dados e exibirá:</p>
+                                        <ul>
+                                            <li>Classificação nutricional para cada indicador</li>
+                                            <li>Resumo estatístico dos resultados</li>
+                                            <li>Relatórios de erros (se houver)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="tutorial-step">
+                                    <div class="step-number">5</div>
+                                    <div class="step-content">
+                                        <h3>Exporte os Dados</h3>
+                                        <p>Baixe os resultados em diferentes formatos:</p>
+                                        <ul>
+                                            <li><strong>CSV:</strong> Para análise em planilhas</li>
+                                            <li><strong>Excel:</strong> Com formatação e cores</li>
+                                            <li><strong>PDF:</strong> Para relatórios profissionais</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <h3 class="page-title" style="font-size: 1.125rem; margin-bottom: 1rem;">Atividade Recente</h3>
-                        <div class="table-container">
-                            <table class="results-table" id="recent-activity-table">                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Idade</th>
-                                        <th>Data de Nascimento</th>
-                                        <th>Data da Avaliação</th>
-                                        <th>Peso (kg)</th>
-                                        <th>Peso/Idade</th>
-                                        <th>Altura (cm)</th>
-                                        <th>Altura/Idade</th>
-                                        <th>IMC</th>
-                                        <th>IMC/Idade</th>
-                                    </tr>
-                                </thead>                                <tbody>
-                                    <tr>
-                                        <td colspan="10" class="text-center">Nenhuma atividade recente.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <!-- Video Tutorial Placeholder -->
+                        <div class="card">
+                            <h2 class="section-title">
+                                <i data-lucide="play-circle"></i>
+                                Tutorial em Vídeo
+                            </h2>
+                            <div class="video-placeholder">
+                                <div class="video-container">
+                                    <div class="video-content">
+                                        <i data-lucide="play-circle"></i>
+                                        <h3>Tutorial Prático</h3>
+                                        <p>Vídeo explicativo sobre como usar o sistema será adicionado aqui</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </section>
 
-                <section id="individual-section" class="page-section">
-                    <div class="page-card">
-                        <h3 class="card-title">Formulário de Avaliação Individual</h3>
-                        <form id="individualForm" class="form-grid">
-                            <div class="form-group col-span-2">
-                                <label for="nome" class="form-label">Nome Completo (Opcional)</label>
-                                <input type="text" id="nome" name="nome" class="form-input"
-                                    placeholder="Ex: João Paulo Oliveira Braga">
-                            </div>
-                            <div class="form-group">
-                                <label for="data_nascimento" class="form-label">Data de Nascimento</label>
-                                <input type="date" id="data_nascimento" name="data_nascimento" class="form-input"
-                                    required>
-                            </div>
-                            <div class="form-group">
-                                <label for="data_avaliacao" class="form-label">Data da Avaliação</label>
-                                <input type="date" id="data_avaliacao" name="data_avaliacao" class="form-input"
-                                    required>
-                            </div>
-                            <div class="form-group">
-                                <label for="sexo" class="form-label">Sexo</label>
-                                <select id="sexo" name="sexo" class="form-input" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="peso_kg" class="form-label">Peso (kg)</label>
-                                <input type="number" step="0.01" id="peso_kg" name="peso_kg" class="form-input"
-                                    placeholder="Ex: 25.5" required>
-                            </div>
-                            <div class="form-group col-span-2">
-                                <label for="altura_cm" class="form-label">Altura / Comprimento (cm)</label>
-                                <input type="number" step="0.1" id="altura_cm" name="altura_cm" class="form-input"
-                                    placeholder="Ex: 120.5" required>
-                            </div>
-                            <div class="form-group col-span-2 form-actions">
-                                <button type="button" id="clearIndividualForm" class="btn btn-secondary">Limpar</button>
-                                <button type="submit" class="btn btn-primary">
+                        <!-- Getting Started Section -->
+                        <div class="card">
+                            <h2 class="section-title">
+                                <i data-lucide="rocket"></i>
+                                Começar Agora
+                            </h2>
+                            <div class="getting-started">
+                                <p>Pronto para começar? Clique no botão abaixo para ir direto à avaliação
+                                    antropométrica:</p>
+                                <button id="start-evaluation-btn" class="btn btn-primary btn-large">
                                     <i data-lucide="calculator"></i>
-                                    Calcular e Avaliar
+                                    Iniciar Avaliação
                                 </button>
                             </div>
-                        </form>
-                    </div>
-
-                    <div id="loading-individual" class="loading-indicator" style="display: none;">Processando...</div>
-                    <div id="error-message-individual" class="error-container" style="display: none;"></div>
-
-                    <div class="page-card" id="individual-result-display" style="display: none;">
-                        <h3 class="card-title">Resultado da Avaliação Individual</h3>
-                        <div class="table-container">
-                            <table class="results-table">                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Idade</th>
-                                        <th>Data de Nascimento</th>
-                                        <th>Data da Avaliação</th>
-                                        <th>Peso (kg)</th>
-                                        <th>Peso/Idade</th>
-                                        <th>Altura (cm)</th>
-                                        <th>Altura/Idade</th>
-                                        <th>IMC</th>
-                                        <th>IMC/Idade</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="individual-table-body">
-                                </tbody>
-                            </table>
                         </div>
-
                     </div>
                 </section>
-
-                <section id="lote-section" class="page-section">
+                <section id="avaliacao-section" class="page-section">
                     <div class="page-card">
-                        <h3 class="card-title">Avaliação de Múltiplos Indivíduos (Lote)</h3>
-                        <p class="card-subtitle">Importe um arquivo CSV ou TSV com os dados para uma avaliação rápida.
-                        </p>
+                        <h3 class="card-title">Avaliação Antropométrica</h3>
+                        <p class="card-subtitle">Adicione pessoas individualmente ou importe um arquivo CSV/TSV</p>
 
-                        <form id="batchForm" class="space-y-4">
-                            <div>
-                                <label for="reportIdentifier" class="form-label">Escola / Comunidade</label>
-                                <input type="text" id="reportIdentifier" name="reportIdentifier" class="form-input"
-                                    placeholder="Ex: EMEI Criança Feliz" required>
-                            </div>
-                            <div>
-                                <label for="reportSubIdentifier" class="form-label">Turma / Grupo (Opcional)</label>
-                                <input type="text" id="reportSubIdentifier" name="reportSubIdentifier"
-                                    class="form-input" placeholder="Ex: Turma do 5º ano, Rua das Flores">
+                        <!-- Formulário unificado -->
+                        <div class="form-section">
+                            <h4 class="text-lg font-semibold mb-4">Informações Gerais (Opcional)</h4>
+                            <div class="form-grid"
+                                style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                                <div class="form-group">
+                                    <label for="escola-nome" class="form-label">Escola / Comunidade</label>
+                                    <input type="text" id="escola-nome" class="form-input"
+                                        placeholder="Ex: EMEI Criança Feliz">
+                                </div>
+                                <div class="form-group">
+                                    <label for="turma-nome" class="form-label">Turma / Grupo</label>
+                                    <input type="text" id="turma-nome" class="form-input"
+                                        placeholder="Ex: Turma do 5º ano">
+                                </div>
                             </div>
 
-                            <div>
-                                <label class="form-label">Arquivo de Lote (.csv, .tsv)</label>
-                                <div class="flex items-center space-x-2">
+                            <div class="border-t border-gray-200 pt-6">
+                                <h4 class="text-lg font-semibold mb-4">1. Importar Lote de um Arquivo</h4>
+
+                                <div class="flex gap-2 mb-4">
                                     <label for="batchFile" class="btn btn-secondary cursor-pointer">
                                         <i data-lucide="upload"></i>
-                                        <span>Escolher arquivo</span>
+                                        <span>Importar CSV/TSV</span>
                                     </label>
+                                    <input type="file" id="batchFile" class="hidden" accept=".csv,.tsv">
                                     <a href="{{ request.url_for('static', path='modelo/modelo_importacao.csv') }}"
                                         download class="btn btn-outline">
                                         <i data-lucide="download"></i>
                                         <span>Baixar Modelo</span>
                                     </a>
                                 </div>
-                                <input type="file" id="batchFile" name="batchFile" class="hidden" accept=".csv,.tsv">
-                                <div id="file-info-display" class="mt-2 text-sm text-gray-600"></div>
+
+                                <!-- Área de informações do arquivo e botão de processar -->
+                                <div id="file-info-display" class="card bg-gray-50 p-4 mb-4" style="display: none;">
+                                    <div class="flex justify-between items-center">
+                                        <div class="file-info">
+                                            <!-- JS will populate this -->
+                                        </div>
+                                        <button id="process-file-btn" class="btn btn-primary" disabled>
+                                            <i data-lucide="play-circle"></i>
+                                            Processar Arquivo
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="separator">OU</div>
+
+                                <h4 class="text-lg font-semibold my-4">2. Adicionar Pessoas Manualmente</h4>
+
+                                <form id="addPersonForm" class="form-grid">
+                                    <div class="form-group">
+                                        <label for="id_paciente" class="form-label">ID do Paciente (Opcional)</label>
+                                        <input type="text" id="id_paciente" name="id_paciente" class="form-input"
+                                            placeholder="Ex: SUS, CPF, ID interno">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nome" class="form-label">Nome Completo (Opcional)</label>
+                                        <input type="text" id="nome" name="nome" class="form-input"
+                                            placeholder="Ex: João Paulo Oliveira Braga">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                                        <input type="date" id="data_nascimento" name="data_nascimento"
+                                            class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="data_avaliacao" class="form-label">Data da Avaliação</label>
+                                        <input type="date" id="data_avaliacao" name="data_avaliacao" class="form-input"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sexo" class="form-label">Sexo</label>
+                                        <select id="sexo" name="sexo" class="form-input" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="M">Masculino</option>
+                                            <option value="F">Feminino</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="peso_kg" class="form-label">Peso (kg)</label>
+                                        <input type="number" step="0.01" id="peso_kg" name="peso_kg" class="form-input"
+                                            placeholder="Ex: 25.5" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="altura_cm" class="form-label">Altura / Comprimento (cm)</label>
+                                        <input type="number" step="0.1" id="altura_cm" name="altura_cm"
+                                            class="form-input" placeholder="Ex: 120.5" required>
+                                    </div>
+                                    <div class="form-group col-span-2 form-actions">
+                                        <button type="button" id="clearPersonForm"
+                                            class="btn btn-secondary">Limpar</button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i data-lucide="plus"></i>
+                                            Adicionar à Lista
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i data-lucide="play-circle"></i>
-                                    <span>Processar Arquivo</span>
-                                </button>
+
+                            <!-- Lista de pessoas adicionadas -->
+                            <div id="people-list-container" style="display: none;"
+                                class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="text-lg font-semibold">Pessoas Adicionadas (<span
+                                            id="people-count">0</span>)</h4>
+                                    <div class="flex gap-2">
+                                        <button id="process-all-btn" class="btn btn-primary">
+                                            <i data-lucide="play-circle"></i>
+                                            Processar Todas
+                                        </button>
+                                        <button id="clear-all-btn" class="btn btn-secondary">
+                                            <i data-lucide="trash-2"></i>
+                                            Limpar Lista
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="table-container">
+                                    <table class="results-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nome</th>
+                                                <th>Data Nasc.</th>
+                                                <th>Data Aval.</th>
+                                                <th>Sexo</th>
+                                                <th>Peso (kg)</th>
+                                                <th>Altura (cm)</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="people-table-body">
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
 
-                    <div id="loading-batch" class="loading-indicator" style="display: none;">Processando arquivo...
-                    </div>
-                    <div id="error-message-batch" class="error-container" style="display: none;"></div>
+                    <!-- Loading indicators -->
+                    <div id="loading-process" class="loading-indicator" style="display: none;">Processando...</div>
 
-                    <div class="page-card" id="batch-result-display" style="display: none;">
-                        <h3 class="card-title">Resultados do Processamento em Lote</h3>
-                        <div id="batch-summary" class="summary-box"></div>
-                        <div id="batch-actions" class="mt-4"></div>
+                    <!-- Error messages -->
+                    <div id="error-message" class="error-container" style="display: none;"></div>
+
+                    <!-- Results section -->
+                    <div class="page-card" id="results-display" style="display: none;">
+                        <h3 class="card-title">Resultados da Avaliação</h3>
+                        <div id="results-summary" class="summary-box"></div>
+                        <div id="results-actions" class="mt-4"></div>
                         <div class="table-container">
-                            <table class="results-table">                                <thead>
+                            <table class="results-table">
+                                <thead>
                                     <tr>
+                                        <th>ID</th>
                                         <th>Nome</th>
                                         <th>Idade</th>
                                         <th>Data de Nascimento</th>
@@ -288,13 +418,13 @@
                                         <th>IMC/Idade</th>
                                     </tr>
                                 </thead>
-                                <tbody id="batch-table-body">
+                                <tbody id="results-table-body">
                                 </tbody>
                             </table>
                         </div>
-                        <div id="batch-errors-display" style="display: none;" class="error-container">
+                        <div id="results-errors-display" style="display: none;" class="error-container">
                             <h4 class="error-title">Detalhes dos Erros</h4>
-                            <ul id="batch-error-list" class="error-list"></ul>
+                            <ul id="results-error-list" class="error-list"></ul>
                         </div>
                     </div>
                 </section>
@@ -347,21 +477,16 @@
                     <h1 class="logo-text">Nutri<span>Sis</span></h1>
                 </div>
                 <button id="close-menu" class="header-icon" aria-label="Fechar menu">
-                    <i data-lucide="x"></i>
-                </button>
+                    <i data-lucide="x"></i> </button>
             </div>
             <nav class="sidebar-nav">
                 <a href="#dashboard" class="nav-link active" data-section="dashboard">
-                    <i data-lucide="layout-dashboard"></i>
-                    Dashboard
+                    <i data-lucide="home"></i>
+                    Boas-vindas
                 </a>
-                <a href="#individual" class="nav-link" data-section="individual">
-                    <i data-lucide="user"></i>
-                    Avaliação Individual
-                </a>
-                <a href="#lote" class="nav-link" data-section="lote">
-                    <i data-lucide="users"></i>
-                    Avaliação em Lote
+                <a href="#avaliacao" class="nav-link" data-section="avaliacao">
+                    <i data-lucide="calculator"></i>
+                    Avaliação Antropométrica
                 </a>
                 <a href="#relatorios" class="nav-link" data-section="relatorios">
                     <i data-lucide="bar-chart-3"></i>
@@ -379,7 +504,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="/static/js/script.js"></script>
+    <script src="../static/js/script.js"></script>
 </body>
 
 </html>

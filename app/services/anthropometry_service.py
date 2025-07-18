@@ -154,6 +154,7 @@ class AnthropometryService:
                 if imc_i: indicadores.append(imc_i)
         
         return ResultadoProcessamentoIndividual(
+            id_paciente=data.id_paciente,
             nome=data.nome,
             sexo=data.sexo.name.capitalize(),
             data_nascimento=data.data_nascimento,
@@ -175,63 +176,136 @@ class AnthropometryService:
 
     def _parse_float_flexible(self, value_str: str) -> Decimal:
         try: 
-            return Decimal(value_str.replace(',', '.'))
+            # Remove espaços e normaliza separadores decimais
+            normalized = str(value_str).strip().replace(',', '.')
+            # Remove aspas se existirem
+            normalized = normalized.strip('"').strip("'")
+            return Decimal(normalized)
         except (InvalidOperation, TypeError): 
             raise ValueError(f"Valor numérico inválido: '{value_str}'.")
 
-    def process_batch_data(self, file_contents: bytes, filename: str) -> Dict[str, Any]:
-        try: 
-            decoded_content = file_contents.decode('utf-8')
-        except UnicodeDecodeError: 
-            raise ValueError("Não foi possível decodificar o arquivo. Verifique se ele está no formato UTF-8.")
+    def _parse_sex_flexible(self, sex_str: str) -> SexoEnum:
+        """Converte valores flexíveis de sexo para SexoEnum"""
+        if not sex_str:
+            raise ValueError("Sexo é obrigatório")
+        
+        sex_normalized = str(sex_str).strip().upper()
+        
+        # Mapeamentos flexíveis
+        male_values = ['M', 'MASCULINO', 'MALE', 'HOMEM', 'MACHO']
+        female_values = ['F', 'FEMININO', 'FEMALE', 'MULHER', 'FEMEA']
+        
+        if sex_normalized in male_values:
+            return SexoEnum.M
+        elif sex_normalized in female_values:
+            return SexoEnum.F
+        else:
+            raise ValueError(f"Valor de sexo inválido: '{sex_str}'. Use M/F, Masculino/Feminino, etc.")
 
+    def _normalize_header(self, header: str) -> str:
+        """Normaliza headers para matching flexível"""
+        if not header:
+            return ""
+        
+        # Remove espaços, converte para minúsculas e remove caracteres especiais
+        normalized = header.strip().lower()
+        normalized = normalized.replace(' ', '_').replace('-', '_').replace('(', '').replace(')', '')
+        
+        # Mapeamentos específicos
+        header_mappings = {
+            'id': 'id_paciente',
+            'identificacao': 'id_paciente',
+            'id_paciente': 'id_paciente',
+            'sus': 'id_paciente',
+            'cpf': 'id_paciente',
+            'cartao_sus': 'id_paciente',
+            'numero_sus': 'id_paciente',
+            'nome_completo': 'nome',
+            'data_de_nascimento': 'data_nascimento',
+            'data_da_avaliacao': 'data_avaliacao',
+            'data_avaliacao': 'data_avaliacao',
+            'gender': 'sexo',
+            'peso_kg': 'peso_kg',
+            'peso__kg_': 'peso_kg',
+            'altura_cm': 'altura_cm',
+            'altura__cm_': 'altura_cm'
+        }
+        
+        return header_mappings.get(normalized, normalized)
+    def process_batch_data(self, file_contents: bytes, filename: str) -> Dict[str, Any]:
+        # Validação de arquivo vazio
+        if not file_contents:
+            raise ValueError("Arquivo está vazio")
+        
+        try: 
+            decoded_content = file_contents.decode('utf-8-sig')  # Remove BOM se existir
+        except UnicodeDecodeError: 
+            try:
+                decoded_content = file_contents.decode('utf-8')
+            except UnicodeDecodeError:
+                raise ValueError("Não foi possível decodificar o arquivo. Verifique se ele está no formato UTF-8.")
+
+        # Validação de conteúdo vazio após decodificação
+        if not decoded_content.strip():
+            raise ValueError("Arquivo não contém dados válidos")
+
+        # Determinar delimitador
         sniffer = csv.Sniffer()
         try:
-            dialect = sniffer.sniff(decoded_content.splitlines()[0] if decoded_content else "")
-            delimiter = dialect.delimiter
-        except csv.Error:            delimiter = ',' if filename.endswith('.csv') else '\t'
+            sample_lines = decoded_content.splitlines()[:3]  # Pega as primeiras 3 linhas
+            if sample_lines:
+                dialect = sniffer.sniff('\n'.join(sample_lines))
+                delimiter = dialect.delimiter
+            else:
+                raise ValueError("Arquivo não contém linhas válidas")
+        except csv.Error:
+            delimiter = ',' if filename.endswith('.csv') else '\t'
         
+        # Processar CSV
         reader = csv.DictReader(io.StringIO(decoded_content), delimiter=delimiter)
+        
+        # Validar headers obrigatórios
+        required_headers = {'data_nascimento', 'data_avaliacao', 'sexo', 'peso_kg', 'altura_cm'}
+        normalized_headers = {self._normalize_header(header): header for header in reader.fieldnames or []}
+        
+        missing_headers = required_headers - set(normalized_headers.keys())
+        if missing_headers:
+            raise ValueError(f"Headers obrigatórios não encontrados: {', '.join(missing_headers)}")
+        
         resultados_individuais, erros_por_linha = [], []
         total_rows_attempted = 0
         
         for i, row in enumerate(reader):
-            line_number = i + 2
+            line_number = i + 2  # +2 porque começamos da linha 2 (linha 1 é o header)
             total_rows_attempted += 1
+            
             try:
-                # Normaliza chaves do dicionário para minúsculas e sem espaços
-                row_normalized = {k.strip().lower(): v for k, v in row.items()}
+                # Normalizar as chaves do row
+                normalized_row = {}
+                for header, value in row.items():
+                    normalized_key = self._normalize_header(header)
+                    normalized_row[normalized_key] = value.strip() if value else ''
                 
-                nome = row_normalized.get('nome')
-                data_nascimento = row_normalized.get('data_nascimento')
-                data_avaliacao = row_normalized.get('data_avaliacao')
-                peso_kg = row_normalized.get('peso_kg')
-                altura_cm = row_normalized.get('altura_cm')
+                # Validar campos obrigatórios (exceto nome que é opcional)
+                for field in required_headers:
+                    if not normalized_row.get(field):
+                        raise ValueError(f"{field} é obrigatório")
                 
-                if not nome:
-                    raise ValueError("Nome é obrigatório")
-                if not data_nascimento:
-                    raise ValueError("Data de nascimento é obrigatória")
-                if not data_avaliacao:
-                    raise ValueError("Data de avaliação é obrigatória")
-                if not peso_kg:
-                    raise ValueError("Peso é obrigatório")
-                if not altura_cm:
-                    raise ValueError("Altura é obrigatória")
-                
+                # Criar IndividuoCreate
                 individuo_data = IndividuoCreate(
-                    nome=str(nome),
-                    data_nascimento=self._parse_date_flexible(str(data_nascimento)),
-                    data_avaliacao=self._parse_date_flexible(str(data_avaliacao)),
-                    sexo=SexoEnum(row_normalized.get('sexo', '').strip().upper()),
-                    peso_kg=self._parse_float_flexible(str(peso_kg)),
-                    altura_cm=self._parse_float_flexible(str(altura_cm))
+                    id_paciente=normalized_row.get('id_paciente', '').strip() or None,  # Opcional
+                    nome=normalized_row.get('nome', f'Pessoa {line_number-1}'),  # Nome padrão se não informado
+                    data_nascimento=self._parse_date_flexible(normalized_row['data_nascimento']),
+                    data_avaliacao=self._parse_date_flexible(normalized_row['data_avaliacao']),
+                    sexo=self._parse_sex_flexible(normalized_row['sexo']),
+                    peso_kg=self._parse_float_flexible(normalized_row['peso_kg']),
+                    altura_cm=self._parse_float_flexible(normalized_row['altura_cm'])
                 )
                 
                 resultado = self.process_individual_data(individuo_data)
                 resultados_individuais.append(resultado)
 
-            except (ValueError, KeyError, AttributeError) as e:
+            except Exception as e:
                 erros_por_linha.append(ErroLinha(linha=line_number, erro=str(e), dados_originais=row))
         
         return {

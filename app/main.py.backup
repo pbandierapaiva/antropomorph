@@ -6,9 +6,11 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import datetime
+import io
+import csv
 
 # Importações do projeto
-from app.models import IndividuoCreate, ResultadoProcessamentoIndividual, ErroLinha
+from app.models import IndividuoCreate, ResultadoProcessamentoIndividual, ErroLinha, BatchProcessingResponse, ReportData
 from app.services.anthropometry_service import AnthropometryService
 from app.db.session import get_db
 from app.core.config import settings
@@ -16,12 +18,20 @@ from app.core.config import settings
 from fastapi.staticfiles import StaticFiles
 from app.models import ResultadoProcessamentoIndividual, ErroLinha
 
-class BatchProcessingResponse(BaseModel):
-    """Resposta padronizada para processamento em lote"""
-    success: bool
-    summary: dict
-    results: List[ResultadoProcessamentoIndividual]
-    errors: List[ErroLinha]
+# Importação para o novo gerador de PDF (Puro Python)
+from fpdf import FPDF
+from fpdf.enums import Align
+
+class PDF(FPDF):
+    """Classe customizada para criar o PDF com cabeçalho e rodapé."""
+    def __init__(self, identifier: str = '', sub_identifier: str = ''):
+        super().__init__()
+        self.identifier = identifier
+        self.sub_identifier = sub_identifier
+from app.core.config import settings
+
+from fastapi.staticfiles import StaticFiles
+from app.models import ResultadoProcessamentoIndividual, ErroLinha
 
 # Importação para o novo gerador de PDF (Puro Python)
 from fpdf import FPDF
@@ -149,8 +159,8 @@ async def export_pdf_fpdf(report_data: ReportData):
         pdf.set_font('Helvetica', 'B', 8)
         pdf.set_fill_color(22, 78, 99)
         pdf.set_text_color(255, 255, 255)
-        col_widths = (25, 35, 25, 20, 20, 17, 35, 17, 38, 10, 30)
-        header = ['ID', 'Nome', 'Idade', 'Data Nasc.', 'Data Aval.', 'Peso(kg)', 'P/I', 'Altura(cm)', 'A/I', 'IMC', 'IMC/I']
+        col_widths = (30, 30, 15, 20, 25, 15, 18, 15, 30, 30, 30)
+        header = ['ID', 'Nome', 'Sexo', 'Nasc.', 'Idade', 'Peso(kg)', 'Altura(cm)', 'IMC', 'P/I', 'A/I', 'IMC/I']
         for i, header_text in enumerate(header):
             pdf.cell(col_widths[i], 8, header_text, border=1, align='C', fill=True)
         pdf.ln()
@@ -170,14 +180,14 @@ async def export_pdf_fpdf(report_data: ReportData):
 
             pdf.cell(col_widths[0], 6, encode_for_latin1(res.id_paciente or ''), border=1, align='L', fill=fill)
             pdf.cell(col_widths[1], 6, encode_for_latin1(res.nome or 'N/A'), border=1, align='L', fill=fill)
-            pdf.cell(col_widths[2], 6, res.idade if res.idade else "N/A", border=1, align='L', fill=fill)
+            pdf.cell(col_widths[2], 6, 'M' if res.sexo == 'M' else 'F', border=1, align='C', fill=fill)
             pdf.cell(col_widths[3], 6, res.data_nascimento.strftime('%d/%m/%Y'), border=1, align='C', fill=fill)
-            pdf.cell(col_widths[4], 6, res.data_avaliacao.strftime('%d/%m/%Y'), border=1, align='C', fill=fill)
+            pdf.cell(col_widths[4], 6, res.idade if res.idade else "N/A", border=1, align='L', fill=fill)
             pdf.cell(col_widths[5], 6, f"{res.peso_kg:.1f}", border=1, align='C', fill=fill)
-            pdf.cell(col_widths[6], 6, encode_for_latin1(get_classification_from_indicators(res.indicadores, "Peso-para-Idade")), border=1, align='L', fill=fill)
-            pdf.cell(col_widths[7], 6, f"{res.altura_cm:.1f}", border=1, align='C', fill=fill)
-            pdf.cell(col_widths[8], 6, encode_for_latin1(get_classification_from_indicators(res.indicadores, "Altura-para-Idade")), border=1, align='L', fill=fill)
-            pdf.cell(col_widths[9], 6, f"{res.imc:.2f}" if res.imc else "N/A", border=1, align='C', fill=fill)
+            pdf.cell(col_widths[6], 6, f"{res.altura_cm:.1f}", border=1, align='C', fill=fill)
+            pdf.cell(col_widths[7], 6, f"{res.imc:.2f}" if res.imc else "N/A", border=1, align='C', fill=fill)
+            pdf.cell(col_widths[8], 6, encode_for_latin1(get_classification_from_indicators(res.indicadores, "Peso-para-Idade")), border=1, align='L', fill=fill)
+            pdf.cell(col_widths[9], 6, encode_for_latin1(get_classification_from_indicators(res.indicadores, "Altura-para-Idade")), border=1, align='L', fill=fill)
             pdf.cell(col_widths[10], 6, encode_for_latin1(imc_i_class), border=1, align='L', fill=fill)
             pdf.ln()
 
@@ -193,12 +203,7 @@ async def export_pdf_fpdf(report_data: ReportData):
                 erro_msg = f"Linha {err.linha}: {nome} - Erro: {err.erro}"
                 pdf.multi_cell(sum(col_widths), 6, encode_for_latin1(erro_msg), border=1, align=Align.L, fill=True)
 
-        # Correção: pdf.output() retorna bytearray, converter para bytes
-        pdf_output = pdf.output()
-        if isinstance(pdf_output, bytearray):
-            pdf_bytes = bytes(pdf_output)
-        else:
-            pdf_bytes = pdf_output
+        pdf_bytes = pdf.output()
         
         file_name = f"Relatorio_{report_data.identifier.replace(' ', '_')}.pdf"
         return Response(content=pdf_bytes, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename=\"{file_name}\""})
@@ -295,10 +300,7 @@ async def export_xlsx(request: ExportRequest):
         
         wb = Workbook()
         ws = wb.active
-        if ws is None:
-            ws = wb.create_sheet("Resultados Antropometria")
-        else:
-            ws.title = "Resultados Antropometria"
+        ws.title = "Resultados Antropometria"
         
         # Cabeçalho com estilo
         headers = [
