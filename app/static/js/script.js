@@ -208,12 +208,61 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Menu mobile
-    if (menuToggle) menuToggle.addEventListener('click', () => mobileMenuOverlay.style.display = 'block');
-    if (closeMenu) closeMenu.addEventListener('click', () => mobileMenuOverlay.style.display = 'none');
-    if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', (e) => {
-        if (e.target === mobileMenuOverlay) mobileMenuOverlay.style.display = 'none';
-    });
+    // Menu mobile com animações melhoradas
+    console.log('Configurando menu mobile...', { menuToggle, closeMenu, mobileMenuOverlay });
+    
+    if (menuToggle && mobileMenuOverlay) {
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Menu toggle clicado');
+            mobileMenuOverlay.classList.add('active');
+            menuToggle.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+    
+    if (closeMenu && mobileMenuOverlay) {
+        closeMenu.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Close menu clicado');
+            mobileMenuOverlay.classList.remove('active');
+            if (menuToggle) menuToggle.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+    }
+    
+    if (mobileMenuOverlay) {
+        // Fechar menu ao clicar no overlay
+        mobileMenuOverlay.addEventListener('click', (e) => {
+            if (e.target === mobileMenuOverlay) {
+                console.log('Overlay clicado');
+                mobileMenuOverlay.classList.remove('active');
+                if (menuToggle) menuToggle.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Fechar menu ao clicar em qualquer link do menu
+        const mobileNavLinks = mobileMenuOverlay.querySelectorAll('.nav-link');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                console.log('Link do menu mobile clicado');
+                mobileMenuOverlay.classList.remove('active');
+                if (menuToggle) menuToggle.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+        });
+        
+        // Fechar menu com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mobileMenuOverlay.classList.contains('active')) {
+                console.log('ESC pressionado');
+                mobileMenuOverlay.classList.remove('active');
+                if (menuToggle) menuToggle.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
 
     // Event listener para adicionar pessoa
     if (addPersonForm) {

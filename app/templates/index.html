@@ -251,6 +251,9 @@
                         <p class="card-subtitle">Adicione pessoas individualmente ou importe um arquivo CSV/TSV</p>
 
                         <!-- Formulário unificado -->
+
+                        <h4 class="text-lg font-semibold my-4">1. Adicionar Pessoas Manualmente</h4>
+
                         <div class="form-section">
                             <h4 class="text-lg font-semibold mb-4">Informações Gerais (Opcional)</h4>
                             <div class="form-grid"
@@ -267,88 +270,88 @@
                                 </div>
                             </div>
 
-                            <div class="border-t border-gray-200 pt-6">
-                                <h4 class="text-lg font-semibold mb-4">1. Importar Lote de um Arquivo</h4>
-
-                                <div class="flex gap-2 mb-4">
-                                    <label for="batchFile" class="btn btn-secondary cursor-pointer">
-                                        <i data-lucide="upload"></i>
-                                        <span>Importar CSV/TSV</span>
-                                    </label>
-                                    <input type="file" id="batchFile" class="hidden" accept=".csv,.tsv">
-                                    <a href="{{ request.url_for('static', path='modelo/modelo_importacao.csv') }}"
-                                        download class="btn btn-outline">
-                                        <i data-lucide="download"></i>
-                                        <span>Baixar Modelo</span>
-                                    </a>
+                            <form id="addPersonForm" class="form-grid">
+                                <div class="form-group">
+                                    <label for="id_paciente" class="form-label">ID do Paciente (Opcional)</label>
+                                    <input type="text" id="id_paciente" name="id_paciente" class="form-input"
+                                        placeholder="Ex: SUS, CPF, ID interno">
                                 </div>
-
-                                <!-- Área de informações do arquivo e botão de processar -->
-                                <div id="file-info-display" class="card bg-gray-50 p-4 mb-4" style="display: none;">
-                                    <div class="flex justify-between items-center">
-                                        <div class="file-info">
-                                            <!-- JS will populate this -->
-                                        </div>
-                                        <button id="process-file-btn" class="btn btn-primary" disabled>
-                                            <i data-lucide="play-circle"></i>
-                                            Processar Arquivo
-                                        </button>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="nome" class="form-label">Nome Completo (Opcional)</label>
+                                    <input type="text" id="nome" name="nome" class="form-input"
+                                        placeholder="Ex: João Paulo Oliveira Braga">
                                 </div>
+                                <div class="form-group">
+                                    <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                                    <input type="date" id="data_nascimento" name="data_nascimento" class="form-input"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="data_avaliacao" class="form-label">Data da Avaliação</label>
+                                    <input type="date" id="data_avaliacao" name="data_avaliacao" class="form-input"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sexo" class="form-label">Sexo</label>
+                                    <select id="sexo" name="sexo" class="form-input" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Feminino</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="peso_kg" class="form-label">Peso (kg)</label>
+                                    <input type="number" step="0.01" id="peso_kg" name="peso_kg" class="form-input"
+                                        placeholder="Ex: 25.5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="altura_cm" class="form-label">Altura / Comprimento (cm)</label>
+                                    <input type="number" step="0.1" id="altura_cm" name="altura_cm" class="form-input"
+                                        placeholder="Ex: 120.5" required>
+                                </div>
+                                <div class="form-group col-span-2 form-actions">
+                                    <button type="button" id="clearPersonForm" class="btn btn-secondary">Limpar</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i data-lucide="plus"></i>
+                                        Adicionar à Lista
+                                    </button>
+                                </div>
+                            </form>
 
-                                <div class="separator">OU</div>
 
-                                <h4 class="text-lg font-semibold my-4">2. Adicionar Pessoas Manualmente</h4>
+                        </div>
 
-                                <form id="addPersonForm" class="form-grid">
-                                    <div class="form-group">
-                                        <label for="id_paciente" class="form-label">ID do Paciente (Opcional)</label>
-                                        <input type="text" id="id_paciente" name="id_paciente" class="form-input"
-                                            placeholder="Ex: SUS, CPF, ID interno">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="nome" class="form-label">Nome Completo (Opcional)</label>
-                                        <input type="text" id="nome" name="nome" class="form-input"
-                                            placeholder="Ex: João Paulo Oliveira Braga">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="data_nascimento" class="form-label">Data de Nascimento</label>
-                                        <input type="date" id="data_nascimento" name="data_nascimento"
-                                            class="form-input" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="data_avaliacao" class="form-label">Data da Avaliação</label>
-                                        <input type="date" id="data_avaliacao" name="data_avaliacao" class="form-input"
-                                            required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="sexo" class="form-label">Sexo</label>
-                                        <select id="sexo" name="sexo" class="form-input" required>
-                                            <option value="">Selecione...</option>
-                                            <option value="M">Masculino</option>
-                                            <option value="F">Feminino</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="peso_kg" class="form-label">Peso (kg)</label>
-                                        <input type="number" step="0.01" id="peso_kg" name="peso_kg" class="form-input"
-                                            placeholder="Ex: 25.5" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="altura_cm" class="form-label">Altura / Comprimento (cm)</label>
-                                        <input type="number" step="0.1" id="altura_cm" name="altura_cm"
-                                            class="form-input" placeholder="Ex: 120.5" required>
-                                    </div>
-                                    <div class="form-group col-span-2 form-actions">
-                                        <button type="button" id="clearPersonForm"
-                                            class="btn btn-secondary">Limpar</button>
-                                        <button type="submit" class="btn btn-primary">
-                                            <i data-lucide="plus"></i>
-                                            Adicionar à Lista
-                                        </button>
-                                    </div>
-                                </form>
+                        <div class="separator">OU</div>
+
+                        <div class="border-t border-gray-200 pt-6">
+                            <h4 class="text-lg font-semibold mb-4">1. Importar Lote de um Arquivo</h4>
+
+                            <div class="flex gap-2 mb-4">
+                                <label for="batchFile" class="btn btn-secondary cursor-pointer">
+                                    <i data-lucide="upload"></i>
+                                    <span>Importar CSV/TSV</span>
+                                </label>
+                                <input type="file" id="batchFile" class="hidden" accept=".csv,.tsv">
+                                <a href="{{ request.url_for('static', path='modelo/modelo_importacao.csv') }}" download
+                                    class="btn btn-outline">
+                                    <i data-lucide="download"></i>
+                                    <span>Baixar Modelo</span>
+                                </a>
                             </div>
+
+                            <!-- Área de informações do arquivo e botão de processar -->
+                            <div id="file-info-display" class="card bg-gray-50 p-4 mb-4" style="display: none;">
+                                <div class="flex justify-between items-center">
+                                    <div class="file-info">
+                                        <!-- JS will populate this -->
+                                    </div>
+                                    <button id="process-file-btn" class="btn btn-primary" disabled>
+                                        <i data-lucide="play-circle"></i>
+                                        Processar Arquivo
+                                    </button>
+                                </div>
+                            </div>
+
 
                             <!-- Lista de pessoas adicionadas -->
                             <div id="people-list-container" style="display: none;"
@@ -361,10 +364,10 @@
                                             <i data-lucide="play-circle"></i>
                                             Processar Todas
                                         </button>
-                                        <button id="clear-all-btn" class="btn btn-secondary">
+                                        <!--  <button id="clear-all-btn" class="btn btn-secondary">
                                             <i data-lucide="trash-2"></i>
                                             Limpar Lista
-                                        </button>
+                                        </button> -->
                                     </div>
                                 </div>
 

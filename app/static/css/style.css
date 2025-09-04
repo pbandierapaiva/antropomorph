@@ -94,6 +94,12 @@ a:hover {
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease-in-out;
+    /* Para animação em mobile */
+}
+
+/* Prevenir scroll da página quando menu mobile está aberto */
+body.menu-open {
+    overflow: hidden;
 }
 
 .sidebar-header {
@@ -204,16 +210,43 @@ a:hover {
 
 #menu-toggle,
 #close-menu {
-    display: none;
-    /* Hidden on desktop by default */
+    display: none; /* Hidden on desktop by default */
     background: none;
     border: none;
     cursor: pointer;
     padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    color: var(--color-text-muted);
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+}
+
+#menu-toggle:hover,
+#close-menu:hover {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+#menu-toggle:active,
+#close-menu:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
 }
 
 #close-menu {
     color: var(--color-text-muted);
+}
+
+/* Ícone animado do menu hambúrguer */
+#menu-toggle i {
+    transition: transform 0.3s ease;
+}
+
+#menu-toggle.active i {
+    transform: rotate(90deg);
 }
 
 
@@ -742,25 +775,49 @@ select.form-input
 /* Mobile & Responsive */
 .mobile-menu-overlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 40;
-    display: none;
-    /* Inicia oculto */
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.mobile-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 .mobile-menu-overlay .sidebar {
-    /* Sidebar dentro do overlay */
     transform: translateX(-100%);
     position: absolute;
     left: 0;
     top: 0;
     height: 100%;
-    z-index: 50;
+    width: 280px;
+    z-index: 1001;
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+    display: flex !important;
 }
 
 .mobile-menu-overlay.active .sidebar {
     transform: translateX(0);
+}
+
+/* Melhor controle do botão de fechar no mobile */
+#close-menu {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+#close-menu:hover {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
 }
 
 
@@ -877,13 +934,10 @@ select.form-input
 
 /* Media Queries */
 @media (min-width: 768px) {
-
     /* md - tablet e acima */
     .sidebar {
         display: flex !important;
-        /* Garantir que seja flexível */
         transform: translateX(0) !important;
-        /* Sempre visível */
     }
 
     #menu-toggle {
@@ -893,8 +947,6 @@ select.form-input
     .mobile-menu-overlay {
         display: none !important;
     }
-
-    /* Nunca mostrar em desktop */
 
     .dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -906,83 +958,394 @@ select.form-input
 }
 
 @media (max-width: 767px) {
-
-    /* < md - mobile */
-    /* .sidebar { */
-        /* No mobile, a sidebar é controlada pelo overlay */
-        /* display: none; é o padrão, mas o overlay a torna flex */
-    /* } */
+    /* Mobile */
+    .sidebar {
+        display: none;
+    }
 
     #menu-toggle {
-        display: block;
+        display: flex !important;
     }
 
-    /* Mostrar botão de menu */
     #close-menu {
-        display: block;
+        display: flex !important;
     }
 
-    /* Mostrar botão de fechar no sidebar mobile */
-
+    /* Reduzir informações do usuário no header mobile */
     .user-info p:first-child {
-        /* Nome do usuário no header */
         display: none;
-        /* Ocultar em telas pequenas para economizar espaço */
     }
 
     .page-title {
         font-size: 1.125rem;
-        /* Reduzir título da página */
     }
 
     .header {
         padding: 0 1rem;
-        /* Reduzir padding do header */
     }
 
     .main-content {
         padding: 1rem;
-        /* Reduzir padding do conteúdo */
     }
 
+    /* Formulários responsivos */
     .form-group.col-span-2 {
-        /* Em mobile, tudo é uma coluna */
         grid-column: span 1 / span 1;
     }
 
     .form-actions {
         flex-direction: column;
-        /* Botões empilhados */
+        gap: 0.5rem;
     }
 
     .form-actions .btn {
         width: 100%;
-        /* Botões ocupam largura total */
     }
 
-    .results-table th,
-    .results-table td {
-        padding: 0.5rem;
-        /* Menor padding nas células da tabela */
+    /* Tabelas responsivas específicas */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -1rem;
+        padding: 0 1rem;
+    }
+
+    .results-table td:nth-child(1):before { content: "ID: "; }
+    .results-table td:nth-child(2):before { content: "Nome: "; }
+    .results-table td:nth-child(3):before { content: "Idade: "; }
+    .results-table td:nth-child(4):before { content: "Data Nasc.: "; }
+    .results-table td:nth-child(5):before { content: "Data Aval.: "; }
+    .results-table td:nth-child(6):before { content: "Peso: "; }
+    .results-table td:nth-child(7):before { content: "P/I: "; }
+    .results-table td:nth-child(8):before { content: "Altura: "; }
+    .results-table td:nth-child(9):before { content: "A/I: "; }
+    .results-table td:nth-child(10):before { content: "IMC: "; }
+    .results-table td:nth-child(11):before { content: "IMC/I: "; }
+
+    .results-table td:before,
+    .table td:before {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+        min-width: 100px;
+        margin-right: 0.5rem;
+        vertical-align: top;
+    }
+
+    /* Para tabela de pessoas adicionadas */
+    .table td:nth-child(1):before { content: "ID: "; }
+    .table td:nth-child(2):before { content: "Nome: "; }
+    .table td:nth-child(3):before { content: "Data Nasc.: "; }
+    .table td:nth-child(4):before { content: "Data Aval.: "; }
+    .table td:nth-child(5):before { content: "Sexo: "; }
+    .table td:nth-child(6):before { content: "Peso: "; }
+    .table td:nth-child(7):before { content: "Altura: "; }
+    .table td:nth-child(8):before { content: "Ações: "; }
+
+    /* Aplicar estilo responsivo a todas as tabelas */
+    .results-table,
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
         font-size: 0.8rem;
-        /* Fonte menor na tabela */
+        display: block;
+        overflow: hidden;
     }
 
-    /* Ocultar colunas menos importantes em mobile */
-    .results-table .mobile-hidden {
+    .results-table thead,
+    .table thead {
         display: none;
+    }
+
+    .results-table tbody,
+    .table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .results-table tr,
+    .table tr {
+        display: block;
+        border: 1px solid var(--color-border);
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        background: var(--color-bg-card);
+        box-shadow: var(--shadow-sm);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .results-table tr:last-child,
+    .table tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .results-table td,
+    .table td {
+        display: block;
+        border: none;
+        border-bottom: 1px solid var(--color-border-light);
+        padding: 0.75rem 0;
+        text-align: left;
+        position: relative;
+        white-space: normal;
+        word-wrap: break-word;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .results-table td:last-child,
+    .table td:last-child {
+        border-bottom: none;
+    }
+
+    /* Status badges dentro das células */
+    .results-table .table-status-badge,
+    .table .table-status-badge {
+        display: inline-block;
+        margin-top: 0.25rem;
+    }
+
+    /* Cards responsivos */
+    .card {
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Botões em mobile */
+    .btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        min-height: 44px; /* Tamanho mínimo para touch */
+        touch-action: manipulation; /* Melhora responsividade ao toque */
+    }
+
+    .btn-large {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+
+    /* Área de toque maior para elementos interativos */
+    .nav-link {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .header-icon {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+    }
+
+    /* Dashboard grid para mobile */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    /* Upload area menor em mobile */
+    .upload-area {
+        min-height: 8rem;
+        padding: 1rem;
+    }
+
+    .upload-area .icon {
+        width: 2rem;
+        height: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Summary cards responsivos */
+    .summary-cards {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .summary-card {
+        padding: 0.75rem;
+    }
+
+    /* File info display */
+    .file-info-display {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .sidebar {
+        width: 280px;
+    }
+
+    /* Ajustar logo no mobile */
+    .logo-text {
+        font-size: 1.125rem;
+    }
+
+    /* Header responsivo */
+    .header-right {
+        gap: 0.5rem;
+    }
+
+    .user-avatar {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .user-info p:last-child {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Mobile pequeno */
+    .header {
+        padding: 0 0.75rem;
+    }
+
+    .main-content {
+        padding: 0.75rem;
+    }
+
+    .page-title {
+        font-size: 1rem;
+    }
+
+    .logo-text {
+        font-size: 1rem;
+    }
+
+    .sidebar {
+        width: 280px;
+    }
+
+    /* Formulários muito pequenos */
+    .form-input {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Tabelas em telas muito pequenas */
+    .results-table td {
+        padding-left: 35% !important;
+        font-size: 0.8rem;
+    }
+
+    .results-table td:before {
+        width: 30%;
+        font-size: 0.7rem;
+    }
+
+    /* Cards menores */
+    .card {
+        padding: 0.75rem;
+    }
+
+    /* Summary cards ainda menores */
+    .summary-value {
+        font-size: 1.25rem;
+    }
+
+    .summary-label {
+        font-size: 0.8rem;
+    }
+
+    /* Welcome hero responsivo */
+    .welcome-hero {
+        padding: 1.5rem 1rem;
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+    }
+
+    .welcome-icon {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Mobile muito pequeno */
+    .app-container {
+        font-size: 14px;
+    }
+
+    .sidebar {
+        width: 260px;
+    }
+
+    .form-input {
+        padding: 0.45rem 0.65rem;
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .results-table td {
+        padding-left: 40% !important;
+        font-size: 0.75rem;
+    }
+
+    .results-table td:before {
+        width: 35%;
+        font-size: 0.65rem;
     }
 }
 
 @media (min-width: 1024px) {
-
-    /* lg */
+    /* lg - desktop */
     .dashboard-grid {
         grid-template-columns: repeat(4, 1fr);
     }
 
-    /* .report-grid { grid-template-columns: 2fr 1fr; } */
-    /* Se for usar a seção de relatórios */
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .main-content {
+        padding: 2rem;
+    }
+
+    .card {
+        padding: 2rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    /* xl - desktop grande */
+    .form-container {
+        max-width: 64rem;
+    }
+
+    .welcome-container {
+        max-width: 900px;
+    }
 }
 
 /* Footer (se for adicionar um global) */
