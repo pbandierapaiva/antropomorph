@@ -2,6 +2,7 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.pool import NullPool
 
 # Importa o objeto 'settings' que contém a URL do banco
 from app.core.config import settings
@@ -11,7 +12,7 @@ DATABASE_URL = settings.DATABASE_URL
 if DATABASE_URL is None:
     raise ValueError("DATABASE_URL is not configured")
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=1800)
+engine = create_engine(DATABASE_URL, poolclass=NullPool)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
