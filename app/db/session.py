@@ -12,7 +12,12 @@ DATABASE_URL = settings.DATABASE_URL
 if DATABASE_URL is None:
     raise ValueError("DATABASE_URL is not configured")
 
-engine = create_engine(DATABASE_URL, poolclass=NullPool)
+engine = create_engine(DATABASE_URL, 
+    #poolclass=NullPool,
+    # Recicla conexões antes do timeout do MariaDB (ex: 1 hora)
+    pool_recycle=3600, 
+    # Testa a conexão ANTES de cada uso. Se estiver morta, reconecta.
+    pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
